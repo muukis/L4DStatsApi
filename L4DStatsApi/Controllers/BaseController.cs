@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace L4DStatsApi.Controllers
 {
@@ -23,19 +24,20 @@ namespace L4DStatsApi.Controllers
         /// <returns>The created Microsoft.AspNetCore.Mvc.StatusCodeResult for the response.</returns>
         protected StatusCodeResult Error()
         {
-            return new StatusCodeResult((int)System.Net.HttpStatusCode.InternalServerError);
+            return new StatusCodeResult((int)HttpStatusCode.InternalServerError);
         }
 
         /// <summary>
         /// Creates an Microsoft.AspNetCore.Mvc.ObjectResult object that produces an InternalServerError (500) response.
         /// </summary>
         /// <param name="value">The content value to format in the entity body.</param>
+        /// <param name="statusCode"></param>
         /// <returns>The created Microsoft.AspNetCore.Mvc.ObjectResult for the response.</returns>
-        protected ObjectResult Error(object value)
+        protected ObjectResult Error(object value, HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
         {
             return new ObjectResult(value)
             {
-                StatusCode = (int)System.Net.HttpStatusCode.InternalServerError
+                StatusCode = (int)statusCode
             };
         }
     }
