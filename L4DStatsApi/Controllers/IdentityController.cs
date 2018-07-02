@@ -37,7 +37,7 @@ namespace L4DStatsApi.Controllers
         {
             try
             {
-                var token = await service.CreateBearerToken(login.Username, login.Identity);
+                var token = await service.CreateBearerToken(login);
                 return Ok(new BearerTokenResult(token));
             }
             catch (Exception)

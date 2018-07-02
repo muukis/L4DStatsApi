@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using L4DStatsApi.Interfaces;
+using L4DStatsApi.Requests;
 using L4DStatsApi.Support;
 using Microsoft.Extensions.Configuration;
 
@@ -14,13 +15,13 @@ namespace L4DStatsApi.Services
             this.configuration = configuration;
         }
 
-        public async Task<string> CreateBearerToken(string username, string gameServerIdentity)
+        public async Task<string> CreateBearerToken(LoginBody login)
         {
             // Todo: Check username and game server identity
 
             var token = new JwtTokenBuilder()
                 .AddSecurityKey(JwtSecurityKey.Create(this.configuration["IdentityService:IssuerSigningKey"]))
-                .AddSubject(username)
+                .AddSubject(login.Username)
                 .AddIssuer(this.configuration["IdentityService:ValidIssuer"])
                 .AddAudience(this.configuration["IdentityService:ValidAudience"])
                 .AddClaim("GameServerIdentifier", "111")

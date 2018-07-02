@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using L4DStatsApi.Interfaces;
+using L4DStatsApi.Requests;
 using Microsoft.Extensions.Configuration;
 
 namespace L4DStatsApi.Services
@@ -13,8 +14,9 @@ namespace L4DStatsApi.Services
             this.configuration = configuration;
         }
 
-        public async Task Test()
+        public async Task SaveGameStats(GameStatsBody gameStats)
         {
+
         }
     }
 }

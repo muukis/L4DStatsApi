@@ -13,7 +13,7 @@ namespace L4DStatsApi.Support
         private string subject = "";
         private string issuer = "";
         private string audience = "";
-        private Dictionary<string, string> claims = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> claims = new Dictionary<string, string>();
         private int expiryInMinutes = 5;
 
         public JwtTokenBuilder AddSecurityKey(SecurityKey securityKey)
@@ -60,14 +60,23 @@ namespace L4DStatsApi.Support
 
         public JwtToken Build()
         {
-            EnsureArguments();
+            if (this.securityKey == null)
+                throw new ArgumentNullException("Security Key");
+
+            if (string.IsNullOrEmpty(this.subject))
+                throw new ArgumentNullException("Subject");
+
+            if (string.IsNullOrEmpty(this.issuer))
+                throw new ArgumentNullException("Issuer");
+
+            if (string.IsNullOrEmpty(this.audience))
+                throw new ArgumentNullException("Audience");
 
             var claims = new List<Claim>
             {
               new Claim(JwtRegisteredClaimNames.Sub, this.subject),
               new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            }
-            .Union(this.claims.Select(item => new Claim(item.Key, item.Value)));
+            }.Union(this.claims.Select(item => new Claim(item.Key, item.Value)));
 
             var token = new JwtSecurityToken(
                               issuer: this.issuer,
@@ -80,24 +89,5 @@ namespace L4DStatsApi.Support
 
             return new JwtToken(token);
         }
-
-        #region " private "
-
-        private void EnsureArguments()
-        {
-            if (this.securityKey == null)
-                throw new ArgumentNullException("Security Key");
-
-            if (string.IsNullOrEmpty(this.subject))
-                throw new ArgumentNullException("Subject");
-
-            if (string.IsNullOrEmpty(this.issuer))
-                throw new ArgumentNullException("Issuer");
-
-            if (string.IsNullOrEmpty(this.audience))
-                throw new ArgumentNullException("Audience");
-        }
-
-        #endregion
     }
 }
