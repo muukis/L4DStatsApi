@@ -20,7 +20,6 @@ namespace L4DStatsApi
     public class Startup
     {
         private const string API_TITLE = "L4D Custom Player Statistics API";
-        private bool swagger = false;
 
         /// <summary>
         /// 
@@ -90,12 +89,8 @@ namespace L4DStatsApi
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 });
 
+#if DEBUG
             string xmlComments = GetXmlCommentsPath();
-
-            if (!System.IO.File.Exists(xmlComments))
-            {
-                return;
-            }
 
             services.AddSwaggerGen(c =>
             {
@@ -114,7 +109,11 @@ namespace L4DStatsApi
                         }
                     });
 
-                c.IncludeXmlComments(xmlComments);
+                if (System.IO.File.Exists(xmlComments))
+                {
+                    c.IncludeXmlComments(xmlComments);
+                }
+
                 c.DescribeAllEnumsAsStrings();
 
                 var security = new Dictionary<string, IEnumerable<string>>
@@ -132,8 +131,7 @@ namespace L4DStatsApi
 
                 c.AddSecurityRequirement(security);
             });
-
-            swagger = true;
+#endif
         }
 
         /// <summary>
@@ -151,16 +149,13 @@ namespace L4DStatsApi
             app.UseAuthentication();
             app.UseMvc();
 
-            if (!this.swagger)
-            {
-                return;
-            }
-
+#if DEBUG
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/ui/swagger.json", API_TITLE);
             });
+#endif
         }
 
         /// <summary>
