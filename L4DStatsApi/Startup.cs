@@ -159,7 +159,7 @@ namespace L4DStatsApi
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/ui/swagger.json", API_TITLE);
+                c.SwaggerEndpoint("./ui/swagger.json", API_TITLE);
             });
         }
 
