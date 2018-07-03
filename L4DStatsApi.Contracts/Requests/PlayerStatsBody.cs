@@ -9,8 +9,8 @@ namespace L4DStatsApi.Requests
         [Required]
         public string Name { get; set; }
         [Required]
-        public int SecondsPlayed { get; set; }
+        public int Kills { get; set; }
         [Required]
-        public WeaponStatsBody[] WeaponStats { get; set; }
+        public int Deaths { get; set; }
     }
 }

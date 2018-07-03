@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System;
+using System.Linq;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
 namespace L4DStatsApi.Controllers
@@ -39,6 +41,16 @@ namespace L4DStatsApi.Controllers
             {
                 StatusCode = (int)statusCode
             };
+        }
+
+        protected string GetUserClaimValue(string claimType)
+        {
+            return this.User.Claims.SingleOrDefault(o => o.Type == claimType)?.Value;
+        }
+
+        protected Guid GetGameServerIdentifier()
+        {
+            return Guid.Parse(GetUserClaimValue("GameServerIdentifier"));
         }
     }
 }

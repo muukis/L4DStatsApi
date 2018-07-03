@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using L4DStatsApi.Interfaces;
@@ -28,18 +29,48 @@ namespace L4DStatsApi.Controllers
         }
 
         /// <summary>
-        /// Save game statistics
+        /// Start a match.
         /// </summary>
+        /// <param name="matchStart">Match starting properties. <see cref="MatchStatsBody"/></param>
+        /// <returns><see cref="MatchStartedResult"/> object.</returns>
         [HttpPost]
-        [SwaggerOperation("SaveGameStats")]
+        [Route("match/start")]
+        [SwaggerOperation("StartMatch")]
         [SwaggerResponse(200, typeof(void))]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        public async Task<IActionResult> SaveGameStats([FromBody] GameStatsBody gameStats)
+        public async Task<IActionResult> StartMatch([FromBody] MatchStartBody matchStart)
         {
             try
             {
-                await service.SaveGameStats(gameStats);
+                return Ok(await service.StartMatch(GetGameServerIdentifier(), matchStart));
+            }
+            catch (Exception)
+            {
+                return Error(new ErrorResult
+                {
+                    Code = 500,
+                    Classification = ErrorClassification.InternalError,
+                    Message = "Failed to start match"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Save match statistics. You can save match statistics as many times as you want, as long as the match has not ended.
+        /// </summary>
+        /// <param name="matchStats">Match statistics. <see cref="MatchStatsBody"/></param>
+        [HttpPost]
+        [Route("match")]
+        [SwaggerOperation("SaveMatchStats")]
+        [SwaggerResponse(200, typeof(void))]
+        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
+        [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
+        public async Task<IActionResult> SaveMatchStats([FromBody] MatchStatsBody matchStats)
+        {
+            try
+            {
+                await service.SaveMatchStats(GetGameServerIdentifier(), matchStats);
                 return Ok();
             }
             catch (Exception)
@@ -48,7 +79,35 @@ namespace L4DStatsApi.Controllers
                 {
                     Code = 500,
                     Classification = ErrorClassification.InternalError,
-                    Message = "Failed saving game statistics"
+                    Message = "Failed saving match statistics"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Start a match.
+        /// </summary>
+        /// <param name="matchEnd">Match ending properties. <see cref="MatchEndBody"/></param>
+        [HttpPost]
+        [Route("match/end")]
+        [SwaggerOperation("EndMatch")]
+        [SwaggerResponse(200, typeof(void))]
+        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
+        [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
+        public async Task<IActionResult> EndMatch([FromBody] MatchEndBody matchEnd)
+        {
+            try
+            {
+                await service.EndMatch(GetGameServerIdentifier(), matchEnd);
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return Error(new ErrorResult
+                {
+                    Code = 500,
+                    Classification = ErrorClassification.InternalError,
+                    Message = "Failed to end match"
                 });
             }
         }

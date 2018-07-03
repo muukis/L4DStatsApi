@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using L4DStatsApi.Interfaces;
 using L4DStatsApi.Requests;
 using L4DStatsApi.Support;
@@ -24,7 +25,7 @@ namespace L4DStatsApi.Services
                 .AddSubject(login.Username)
                 .AddIssuer(this.configuration["IdentityService:ValidIssuer"])
                 .AddAudience(this.configuration["IdentityService:ValidAudience"])
-                .AddClaim("GameServerIdentifier", "111")
+                .AddClaim("GameServerIdentifier", Guid.NewGuid().ToString())
                 .AddExpiry(60)
                 .Build();
 
