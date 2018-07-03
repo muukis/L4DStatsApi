@@ -29,8 +29,8 @@ namespace L4DStatsApi
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(hostEnv.ContentRootPath)
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{hostEnv.EnvironmentName}.json", true)
+                .AddJsonFile("appsettings.json", false, true)
+                .AddJsonFile($"appsettings.{hostEnv.EnvironmentName}.json", true, true)
                 .AddEnvironmentVariables();
 
             if (hostEnv.IsEnvironment("Development"))
