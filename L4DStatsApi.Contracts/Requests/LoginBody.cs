@@ -1,12 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace L4DStatsApi.Requests
 {
     public class LoginBody
     {
         [Required]
-        public string Username { get; set; }
+        public string ApiUser { get; set; }
         [Required]
-        public string Identity { get; set; }
+        public Guid ApiKey { get; set; }
     }
 }

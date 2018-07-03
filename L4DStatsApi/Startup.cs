@@ -5,6 +5,7 @@ using L4DStatsApi.Support;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
@@ -57,6 +58,7 @@ namespace L4DStatsApi
             services.AddSingleton(Configuration);
             services.AddTransient<IIdentityService, IdentityService>();
             services.AddTransient<IStatsService, StatsServiceMock>();
+            services.AddDbContext<StatsDbContext>(options => options.UseSqlServer(Configuration["ConnectionString"]));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {

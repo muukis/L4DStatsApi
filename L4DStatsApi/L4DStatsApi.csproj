@@ -42,6 +42,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\L4DStatsApi.Contracts\L4DStatsApi.Contracts.csproj" />
+    <ProjectReference Include="..\L4DStatsApi.Database\L4DStatsApi.Database.csproj" />
     <ProjectReference Include="..\L4DStatsApi.Services\L4DStatsApi.Services.csproj" />
   </ItemGroup>
 

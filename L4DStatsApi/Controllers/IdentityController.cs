@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using L4DStatsApi.Interfaces;
 using L4DStatsApi.Requests;
@@ -30,14 +31,26 @@ namespace L4DStatsApi.Controllers
         /// <returns><see cref="BearerTokenResult"/> object</returns>
         [HttpPost]
         [SwaggerOperation("CreateBearerToken")]
-        [SwaggerResponse(200, typeof(string), "Returns identity token for L4D custom player statistics API.")]
+        [SwaggerResponse(200, typeof(string), "Returns identity token for the stats API.")]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
+        [SwaggerResponse(900, typeof(ErrorResult), "Invalid login")]
         public async Task<IActionResult> CreateBearerToken([FromBody] LoginBody login)
         {
             try
             {
                 var token = await service.CreateBearerToken(login);
+
+                if (token == null)
+                {
+                    return Error(new ErrorResult
+                    {
+                        Code = 900,
+                        Classification = ErrorClassification.EntityNotFound,
+                        Message = "Login information does not match database value"
+                    }, HttpStatusCode.NotFound);
+                }
+
                 return Ok(new BearerTokenResult(token));
             }
             catch (Exception)

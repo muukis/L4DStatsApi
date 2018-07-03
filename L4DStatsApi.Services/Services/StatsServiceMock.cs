@@ -136,11 +136,13 @@ namespace L4DStatsApi.Services
         #endregion
 
         private readonly IConfiguration configuration;
+        private readonly StatsDbContext dbContext;
         private static readonly StaticDatabaseForStats StatsDb = new StaticDatabaseForStats();
 
-        public StatsServiceMock(IConfiguration configuration)
+        public StatsServiceMock(IConfiguration configuration, StatsDbContext dbContext)
         {
             this.configuration = configuration;
+            this.dbContext = dbContext;
         }
 
         public async Task<MatchStartedResult> StartMatch(Guid gameServerId, MatchStartBody matchStart)
