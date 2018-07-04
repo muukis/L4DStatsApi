@@ -1,0 +1,7 @@
+﻿CREATE TABLE [dbo].[GameServerGroup]
+(
+	[Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT (newid()), 
+    [Key] UNIQUEIDENTIFIER DEFAULT (newid()) NOT NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1, 
+    [IsValid] BIT NOT NULL DEFAULT 1
+)

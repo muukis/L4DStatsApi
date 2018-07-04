@@ -6,8 +6,8 @@ namespace L4DStatsApi.Requests
     public class LoginBody
     {
         [Required]
-        public string ApiUser { get; set; }
+        public Guid GameServerGroupKey { get; set; }
         [Required]
-        public Guid ApiKey { get; set; }
+        public Guid GameServerKey { get; set; }
     }
 }

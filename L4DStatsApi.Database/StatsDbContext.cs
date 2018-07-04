@@ -9,6 +9,7 @@ namespace L4DStatsApi
             : base(options)
         { }
 
+        public DbSet<GameServerGroupModel> GameServerGroup { get; set; }
         public DbSet<GameServerModel> GameServer { get; set; }
     }
 }

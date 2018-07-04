@@ -23,7 +23,7 @@ namespace L4DStatsApi.Services
         public async Task<string> CreateBearerToken(LoginBody login)
         {
             var gameServer = await this.dbContext.GameServer.SingleOrDefaultAsync(o =>
-                o.ApiUser.Equals(login.ApiUser, StringComparison.InvariantCulture) && o.ApiKey == login.ApiKey);
+                o.Group.Key == login.GameServerGroupKey && o.Key == login.GameServerKey);
 
             if (gameServer == null)
             {
@@ -32,11 +32,12 @@ namespace L4DStatsApi.Services
 
             var token = new JwtTokenBuilder()
                 .AddSecurityKey(JwtSecurityKey.Create(this.configuration["IdentityService:IssuerSigningKey"]))
-                .AddSubject(login.ApiUser)
+                .AddSubject(gameServer.Name)
                 .AddIssuer(this.configuration["IdentityService:ValidIssuer"])
                 .AddAudience(this.configuration["IdentityService:ValidAudience"])
-                .AddClaim("GameServerIdentifier", gameServer.ApiKey.ToString())
-                .AddExpiry(60)
+                .AddClaim("GameServerGroupIdentifier", gameServer.Group.Id.ToString())
+                .AddClaim("GameServerIdentifier", gameServer.Id.ToString())
+                .AddExpiry(int.Parse(this.configuration["IdentityService:TokenExpiry"] ?? "60"))
                 .Build();
 
             return token.Value;

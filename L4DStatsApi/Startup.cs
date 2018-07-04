@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using L4DStatsApi.Interfaces;
 using L4DStatsApi.Services;
 using L4DStatsApi.Support;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,6 +42,7 @@ namespace L4DStatsApi
             {
                 // This will push telemetry data through Application Insights pipeline faster, allowing you to view results immediately.
                 builder.AddApplicationInsightsSettings(true);
+                builder.AddUserSecrets<Startup>();
             }
 
             Configuration = builder.Build();
@@ -75,10 +79,27 @@ namespace L4DStatsApi
                     };
                 });
 
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultChallengeScheme = FacebookDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddFacebook(options =>
+                {
+                    options.AppId = Configuration["Authentication:Facebook:AppId"];
+                    options.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
+                })
+                .AddCookie();
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("GameServer",
-                    policy => policy.RequireClaim("GameServerIdentifier"));
+                    policy =>
+                    {
+                        policy.RequireClaim("GameServerGroupIdentifier");
+                        policy.RequireClaim("GameServerIdentifier");
+                    });
             });
             
             // Add framework services.
@@ -90,6 +111,10 @@ namespace L4DStatsApi
                 .AddJsonOptions(options =>
                 {
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                })
+                .AddRazorPagesOptions(options =>
+                {
+                    options.Conventions.AuthorizeFolder("/GameServerManager");
                 });
 
             string xmlComments = GetXmlCommentsPath();

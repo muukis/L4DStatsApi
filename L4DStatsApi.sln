@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "L4DStatsApi.Contracts", "L4
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "L4DStatsApi.Database.Schema", "L4DStatsApi.Database.Schema\L4DStatsApi.Database.Schema.sqlproj", "{C0024D31-A6F9-4A59-87C0-C000B0EFEFC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L4DStatsApi.Database", "L4DStatsApi.Database\L4DStatsApi.Database.csproj", "{D422DAB4-A7A7-4BF5-BE88-4FFD07E1060D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "L4DStatsApi.Database", "L4DStatsApi.Database\L4DStatsApi.Database.csproj", "{D422DAB4-A7A7-4BF5-BE88-4FFD07E1060D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
