@@ -9,10 +9,12 @@ namespace L4DStatsApi.Mappings
         public void Configure(EntityTypeBuilder<GameServerModel> builder)
         {
             builder.HasKey(gs => gs.Id);
-            builder.HasAlternateKey(gs => gs.Key);
+            builder.HasAlternateKey(gs => gs.PrivateKey);
+            builder.HasAlternateKey(gs => gs.PublicKey);
 
             builder.Property(gs => gs.Id).HasDefaultValue();
-            builder.Property(gs => gs.Key).HasDefaultValue();
+            builder.Property(gs => gs.PrivateKey).HasDefaultValue();
+            builder.Property(gs => gs.PublicKey).HasDefaultValue();
             builder.Property(gs => gs.GroupId).IsRequired();
             builder.Property(gs => gs.IsActive).HasDefaultValue();
             builder.Property(gs => gs.IsValid).HasDefaultValue();

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using L4DStatsApi.Helpers.Database;
 using L4DStatsApi.Interfaces;
@@ -8,7 +6,6 @@ using L4DStatsApi.Requests;
 using L4DStatsApi.Results;
 using L4DStatsApi.Support;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -72,7 +69,7 @@ namespace L4DStatsApi.Controllers
         }
 
         /// <summary>
-        /// Save match statistics. You can save match statistics as many times as you want, as long as the match has not ended.
+        /// Save match statistics. You can save match statistics as many times as you want, as long as the match has not ended. All stats saved are added to existing match stats.
         /// </summary>
         /// <param name="matchStats">Match statistics. <see cref="MatchStatsBody"/></param>
         [HttpPost]

@@ -1,8 +1,9 @@
 ﻿CREATE TABLE [dbo].[GameServer] (
     [Id]      UNIQUEIDENTIFIER DEFAULT (newid()) NOT NULL,
-    [Key]      UNIQUEIDENTIFIER DEFAULT (newid()) NOT NULL,
+    [PrivateKey]      UNIQUEIDENTIFIER DEFAULT (newid()) NOT NULL,
+    [PublicKey]      UNIQUEIDENTIFIER DEFAULT (newid()) NOT NULL,
     [GroupId] UNIQUEIDENTIFIER NOT NULL, 
-    [Name]    NVARCHAR (255)   NULL,
+    [Name]    NVARCHAR (255)   NOT NULL,
     [IsActive] BIT NOT NULL DEFAULT 1, 
     [IsValid] BIT NOT NULL DEFAULT 1, 
     [LastActive] DATETIME NOT NULL DEFAULT (getutcdate()), 

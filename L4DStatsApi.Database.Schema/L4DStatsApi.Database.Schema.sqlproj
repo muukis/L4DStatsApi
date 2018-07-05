@@ -71,4 +71,7 @@
   <ItemGroup>
     <RefactorLog Include="L4DStatsApi.Database.Schema.refactorlog" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="InsertTestingData.sql" />
+  </ItemGroup>
 </Project>

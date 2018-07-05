@@ -6,7 +6,7 @@ namespace L4DStatsApi.Models
     {
         public Guid Id { get; set; }
         public Guid MatchId { get; set; }
-        public MatchModel Match { get; set; }
+        public virtual MatchModel Match { get; set; }
         public string SteamId { get; set; }
         public string Name { get; set; }
         public int Kills { get; set; }

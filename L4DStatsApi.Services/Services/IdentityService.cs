@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using L4DStatsApi.Interfaces;
 using L4DStatsApi.Requests;
+using L4DStatsApi.Results;
 using L4DStatsApi.Support;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -20,21 +21,23 @@ namespace L4DStatsApi.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<string> CreateBearerToken(LoginBody login)
+        public async Task<BearerTokenResult> CreateBearerToken(LoginBody login)
         {
             var gameServer =
                 await (from gs in this.dbContext.GameServer
                         join gsg in this.dbContext.GameServerGroup
                             on gs.GroupId equals gsg.Id
-                        where gs.Key == login.GameServerKey
-                              && gsg.Key == login.GameServerGroupKey
+                        where gs.PrivateKey == login.GameServerPrivateKey
+                              && gsg.PrivateKey == login.GameServerGroupPrivateKey
                               && gs.IsActive && gs.IsValid
                               && gsg.IsActive && gsg.IsValid
                         select new
                         {
                             Name = gs.Name,
+                            GameServerGroupIdentifier = gsg.Id,
+                            GameServerGroupPublicKey = gsg.PublicKey,
                             GameServerIdentifier = gs.Id,
-                            GameServerGroupIdentifier = gsg.Id
+                            GameServerPublicKey = gs.PublicKey
                         })
                     .SingleOrDefaultAsync();
 
@@ -53,7 +56,7 @@ namespace L4DStatsApi.Services
                 .AddExpiry(int.Parse(this.configuration["IdentityService:TokenExpiry"] ?? "60"))
                 .Build();
 
-            return token.Value;
+            return new BearerTokenResult(token.Value, gameServer.GameServerGroupPublicKey, gameServer.GameServerPublicKey);
         }
     }
 }

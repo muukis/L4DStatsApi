@@ -11,6 +11,7 @@ namespace L4DStatsApi.Mappings
             builder.HasKey(mp => mp.Id);
 
             builder.Property(mp => mp.Id).HasDefaultValue();
+            builder.Property(mp => mp.MatchId).IsRequired();
             builder.Property(mp => mp.SteamId).HasMaxLength(50).IsRequired();
             builder.Property(mp => mp.Name).HasMaxLength(50).IsRequired();
             builder.Property(mp => mp.Kills).IsRequired();

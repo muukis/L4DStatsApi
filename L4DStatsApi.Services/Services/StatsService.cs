@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using L4DStatsApi.Helpers.Database;
 using L4DStatsApi.Interfaces;
@@ -95,20 +96,18 @@ namespace L4DStatsApi.Services
             await this.dbContext.SaveChangesAsync();
         }
 
-        public async Task<PlayerStatsResult> GetPlayerStats(string steamId)
+        public async Task<PlayerStatsResult> GetPlayerStats(string steamId, Func<MatchPlayerModel, bool> additionalValidation = null)
         {
             var matchPlayerModels =
-                await (from mp in this.dbContext.MatchPlayer
-                    join m in this.dbContext.Match on mp.MatchId equals m.Id
-                    join gs in this.dbContext.GameServer on m.GameServerId equals gs.Id
-                    join gsg in this.dbContext.GameServerGroup on gs.GroupId equals gsg.Id 
-                    where mp.SteamId == steamId
-                          && gs.IsValid
-                          && gsg.IsValid
-                    select new { Match = m, MatchPlayer = mp })
-                    .OrderBy(o => o.Match.StartTime)
-                    .Select(o => o.MatchPlayer)
-                    .ToListAsync();
+                await this.dbContext.MatchPlayer.Include(mp => mp.Match)
+                    .Where(mp => mp.SteamId == steamId
+                                 && mp.Match.GameServer.IsValid
+                                 && mp.Match.GameServer.Group.IsValid).ToListAsync();
+
+            if (additionalValidation != null)
+            {
+                matchPlayerModels = matchPlayerModels.Where(additionalValidation).ToList();
+            }
 
             if (matchPlayerModels.Count == 0)
             {

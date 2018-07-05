@@ -58,7 +58,7 @@ namespace L4DStatsApi
             services.AddSingleton(Configuration);
             services.AddTransient<IIdentityService, IdentityService>();
             services.AddTransient<IStatsService, StatsService>();
-            services.AddDbContext<StatsDbContext>(options => options.UseSqlServer(Configuration["ConnectionString"]));
+            services.AddDbContext<StatsDbContext>(options => options.UseLazyLoadingProxies().UseSqlServer(Configuration["ConnectionString"]));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
