@@ -2,7 +2,6 @@
 using System.Net;
 using System.Threading.Tasks;
 using L4DStatsApi.Interfaces;
-using L4DStatsApi.Requests;
 using L4DStatsApi.Results;
 using L4DStatsApi.Support;
 using Microsoft.AspNetCore.Mvc;
@@ -14,44 +13,44 @@ namespace L4DStatsApi.Controllers
     [Route("api/[controller]")]
     [Produces("application/json")]
     [ApiController]
-    public class IdentityController : BaseController
+    public class PublicStatsController : BaseController
     {
         private readonly IConfiguration configuration;
-        private readonly IIdentityService service;
+        private readonly IStatsService service;
 
-        public IdentityController(IConfiguration configuration, IIdentityService service)
+        public PublicStatsController(IConfiguration configuration, IStatsService service)
         {
             this.configuration = configuration;
             this.service = service;
         }
 
         /// <summary>
-        /// Create identity token
+        /// Get player game statistics
         /// </summary>
-        /// <returns><see cref="BearerTokenResult"/> object</returns>
-        [HttpPost]
-        [SwaggerOperation("CreateBearerToken")]
-        [SwaggerResponse(200, typeof(string), "Returns identity token for the stats API.")]
+        [HttpGet]
+        [Route("player/{steamId}")]
+        [SwaggerOperation("GetPlayerStats")]
+        [SwaggerResponse(200, typeof(void))]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        [SwaggerResponse(900, typeof(ErrorResult), "Invalid login")]
-        public async Task<IActionResult> CreateBearerToken([FromBody] LoginBody login)
+        [SwaggerResponse(900, typeof(ErrorResult), "Player not found")]
+        public async Task<IActionResult> GetPlayerStats([FromRoute] string steamId)
         {
             try
             {
-                var token = await service.CreateBearerToken(login);
+                var playerStats = await service.GetPlayerStats(steamId);
 
-                if (token == null)
+                if (playerStats == null)
                 {
                     return Error(new ErrorResult
                     {
                         Code = 900,
                         Classification = ErrorClassification.EntityNotFound,
-                        Message = "Invalid login information"
+                        Message = "Player not found"
                     }, HttpStatusCode.NotFound);
                 }
 
-                return Ok(new BearerTokenResult(token));
+                return Ok(playerStats);
             }
             catch (Exception)
             {
@@ -59,7 +58,7 @@ namespace L4DStatsApi.Controllers
                 {
                     Code = 500,
                     Classification = ErrorClassification.InternalError,
-                    Message = "Failed creating identity token"
+                    Message = "Failed getting player statistics"
                 });
             }
         }

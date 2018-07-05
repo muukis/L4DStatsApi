@@ -2,11 +2,13 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using L4DStatsApi.Helpers.Database;
 using L4DStatsApi.Interfaces;
 using L4DStatsApi.Requests;
 using L4DStatsApi.Results;
 using L4DStatsApi.Support;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -29,6 +31,19 @@ namespace L4DStatsApi.Controllers
         }
 
         /// <summary>
+        /// Get API user identity.
+        /// </summary>
+        /// <returns><see cref="ApiUserIdentityContainer"/> object</returns>
+        protected ApiUserIdentityContainer GetApiUserIdentityContainer()
+        {
+            return new ApiUserIdentityContainer
+            {
+                GameServerIdentifier = Guid.Parse(GetApiUserClaimValue("GameServerIdentifier")),
+                GameServerGroupIdentifier = Guid.Parse(GetApiUserClaimValue("GameServerGroupIdentifier"))
+            };
+        }
+
+        /// <summary>
         /// Start a match.
         /// </summary>
         /// <param name="matchStart">Match starting properties. <see cref="MatchStatsBody"/></param>
@@ -43,7 +58,7 @@ namespace L4DStatsApi.Controllers
         {
             try
             {
-                return Ok(await service.StartMatch(GetGameServerIdentifier(), matchStart));
+                return Ok(await service.StartMatch(GetApiUserIdentityContainer(), matchStart));
             }
             catch (Exception)
             {
@@ -70,7 +85,7 @@ namespace L4DStatsApi.Controllers
         {
             try
             {
-                await service.SaveMatchStats(GetGameServerIdentifier(), matchStats);
+                await service.SaveMatchStats(GetApiUserIdentityContainer(), matchStats);
                 return Ok();
             }
             catch (Exception)
@@ -98,7 +113,7 @@ namespace L4DStatsApi.Controllers
         {
             try
             {
-                await service.EndMatch(GetGameServerIdentifier(), matchEnd);
+                await service.EndMatch(GetApiUserIdentityContainer(), matchEnd);
                 return Ok();
             }
             catch (Exception)
@@ -108,45 +123,6 @@ namespace L4DStatsApi.Controllers
                     Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed to end match"
-                });
-            }
-        }
-
-        /// <summary>
-        /// Get player game statistics
-        /// </summary>
-        [HttpGet]
-        [Route("player/{steamId}")]
-        [SwaggerOperation("GetPlayerStats")]
-        [SwaggerResponse(200, typeof(void))]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
-        [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        [SwaggerResponse(900, typeof(ErrorResult), "Player not found")]
-        public async Task<IActionResult> GetPlayerStats([FromRoute] string steamId)
-        {
-            try
-            {
-                var playerStats = await service.GetPlayerStats(steamId);
-
-                if (playerStats == null)
-                {
-                    return Error(new ErrorResult
-                    {
-                        Code = 900,
-                        Classification = ErrorClassification.EntityNotFound,
-                        Message = "Player not found"
-                    }, HttpStatusCode.NotFound);
-                }
-
-                return Ok(playerStats);
-            }
-            catch (Exception)
-            {
-                return Error(new ErrorResult
-                {
-                    Code = 500,
-                    Classification = ErrorClassification.InternalError,
-                    Message = "Failed getting player statistics"
                 });
             }
         }

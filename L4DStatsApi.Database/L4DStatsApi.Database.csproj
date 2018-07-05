@@ -10,4 +10,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\L4DStatsApi.Helpers\L4DStatsApi.Helpers.csproj" />
+  </ItemGroup>
+
 </Project>

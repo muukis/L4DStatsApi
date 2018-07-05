@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using L4DStatsApi.Interfaces;
 using L4DStatsApi.Services;
 using L4DStatsApi.Support;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -40,7 +37,6 @@ namespace L4DStatsApi
 
             if (hostEnv.IsEnvironment("Development"))
             {
-                // This will push telemetry data through Application Insights pipeline faster, allowing you to view results immediately.
                 builder.AddApplicationInsightsSettings(true);
                 builder.AddUserSecrets<Startup>();
             }
@@ -61,7 +57,7 @@ namespace L4DStatsApi
         {
             services.AddSingleton(Configuration);
             services.AddTransient<IIdentityService, IdentityService>();
-            services.AddTransient<IStatsService, StatsServiceMock>();
+            services.AddTransient<IStatsService, StatsService>();
             services.AddDbContext<StatsDbContext>(options => options.UseSqlServer(Configuration["ConnectionString"]));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -79,18 +75,18 @@ namespace L4DStatsApi
                     };
                 });
 
-            services.AddAuthentication(options =>
-                {
-                    options.DefaultChallengeScheme = FacebookDefaults.AuthenticationScheme;
-                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                })
-                .AddFacebook(options =>
-                {
-                    options.AppId = Configuration["Authentication:Facebook:AppId"];
-                    options.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
-                })
-                .AddCookie();
+            //services.AddAuthentication(options =>
+            //    {
+            //        options.DefaultChallengeScheme = FacebookDefaults.AuthenticationScheme;
+            //        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            //        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            //    })
+            //    .AddFacebook(options =>
+            //    {
+            //        options.AppId = Configuration["Authentication:Facebook:AppId"];
+            //        options.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
+            //    })
+            //    .AddCookie();
 
             services.AddAuthorization(options =>
             {
@@ -102,10 +98,8 @@ namespace L4DStatsApi
                     });
             });
             
-            // Add framework services.
             services.AddApplicationInsightsTelemetry(Configuration);
 
-            // Add framework services.
             services
                 .AddMvc()
                 .AddJsonOptions(options =>
@@ -116,6 +110,8 @@ namespace L4DStatsApi
                 {
                     options.Conventions.AuthorizeFolder("/GameServerManager");
                 });
+
+            services.AddCors(options => options.AddPolicy("AllowOrigin", builder => builder.AllowAnyOrigin()));
 
             string xmlComments = GetXmlCommentsPath();
 

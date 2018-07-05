@@ -22,8 +22,21 @@ namespace L4DStatsApi.Services
 
         public async Task<string> CreateBearerToken(LoginBody login)
         {
-            var gameServer = await this.dbContext.GameServer.SingleOrDefaultAsync(o =>
-                o.Group.Key == login.GameServerGroupKey && o.Key == login.GameServerKey);
+            var gameServer =
+                await (from gs in this.dbContext.GameServer
+                        join gsg in this.dbContext.GameServerGroup
+                            on gs.GroupId equals gsg.Id
+                        where gs.Key == login.GameServerKey
+                              && gsg.Key == login.GameServerGroupKey
+                              && gs.IsActive && gs.IsValid
+                              && gsg.IsActive && gsg.IsValid
+                        select new
+                        {
+                            Name = gs.Name,
+                            GameServerIdentifier = gs.Id,
+                            GameServerGroupIdentifier = gsg.Id
+                        })
+                    .SingleOrDefaultAsync();
 
             if (gameServer == null)
             {
@@ -35,8 +48,8 @@ namespace L4DStatsApi.Services
                 .AddSubject(gameServer.Name)
                 .AddIssuer(this.configuration["IdentityService:ValidIssuer"])
                 .AddAudience(this.configuration["IdentityService:ValidAudience"])
-                .AddClaim("GameServerGroupIdentifier", gameServer.Group.Id.ToString())
-                .AddClaim("GameServerIdentifier", gameServer.Id.ToString())
+                .AddClaim("GameServerGroupIdentifier", gameServer.GameServerGroupIdentifier.ToString())
+                .AddClaim("GameServerIdentifier", gameServer.GameServerIdentifier.ToString())
                 .AddExpiry(int.Parse(this.configuration["IdentityService:TokenExpiry"] ?? "60"))
                 .Build();
 

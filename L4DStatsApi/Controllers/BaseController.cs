@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,14 +42,14 @@ namespace L4DStatsApi.Controllers
             };
         }
 
-        protected string GetUserClaimValue(string claimType)
+        /// <summary>
+        /// Get API user claim value.
+        /// </summary>
+        /// <param name="claimType"></param>
+        /// <returns></returns>
+        protected string GetApiUserClaimValue(string claimType)
         {
             return this.User.Claims.SingleOrDefault(o => o.Type == claimType)?.Value;
-        }
-
-        protected Guid GetGameServerIdentifier()
-        {
-            return Guid.Parse(GetUserClaimValue("GameServerIdentifier"));
         }
     }
 }

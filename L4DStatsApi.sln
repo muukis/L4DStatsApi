@@ -13,6 +13,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "L4DStatsApi.Database.Schema
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "L4DStatsApi.Database", "L4DStatsApi.Database\L4DStatsApi.Database.csproj", "{D422DAB4-A7A7-4BF5-BE88-4FFD07E1060D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L4DStatsApi.Helpers", "L4DStatsApi.Helpers\L4DStatsApi.Helpers.csproj", "{E258F206-DE74-4FF0-873C-BB3F0FFF782F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,14 @@ Global
 		{D422DAB4-A7A7-4BF5-BE88-4FFD07E1060D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D422DAB4-A7A7-4BF5-BE88-4FFD07E1060D}.Release|x64.ActiveCfg = Release|Any CPU
 		{D422DAB4-A7A7-4BF5-BE88-4FFD07E1060D}.Release|x64.Build.0 = Release|Any CPU
+		{E258F206-DE74-4FF0-873C-BB3F0FFF782F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E258F206-DE74-4FF0-873C-BB3F0FFF782F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E258F206-DE74-4FF0-873C-BB3F0FFF782F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E258F206-DE74-4FF0-873C-BB3F0FFF782F}.Debug|x64.Build.0 = Debug|Any CPU
+		{E258F206-DE74-4FF0-873C-BB3F0FFF782F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E258F206-DE74-4FF0-873C-BB3F0FFF782F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E258F206-DE74-4FF0-873C-BB3F0FFF782F}.Release|x64.ActiveCfg = Release|Any CPU
+		{E258F206-DE74-4FF0-873C-BB3F0FFF782F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

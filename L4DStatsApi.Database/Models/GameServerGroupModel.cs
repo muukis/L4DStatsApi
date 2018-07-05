@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace L4DStatsApi.Models
 {
@@ -8,5 +9,6 @@ namespace L4DStatsApi.Models
         public Guid Key { get; set; }
         public bool IsActive { get; set; }
         public bool IsValid { get; set; }
+        public List<GameServerModel> GameServers { get; set; }
     }
 }
