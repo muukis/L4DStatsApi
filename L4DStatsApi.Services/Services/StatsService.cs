@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using L4DStatsApi.Helpers.Database;
@@ -123,6 +124,43 @@ namespace L4DStatsApi.Services
 
                 return result;
             });
+        }
+
+        public async Task<List<PlayerStatsResult>> GetPlayers(int startingIndex, int pageSize, Func<MatchPlayerModel, bool> additionalValidation = null)
+        {
+            var matchPlayerModels =
+                await this.dbContext.MatchPlayer.Include(mp => mp.Match)
+                    .Where(mp => mp.Match.GameServer.IsValid
+                                 && mp.Match.GameServer.Group.IsValid).ToListAsync();
+
+            if (additionalValidation != null)
+            {
+                matchPlayerModels = matchPlayerModels.Where(additionalValidation).ToList();
+            }
+
+            if (matchPlayerModels.Count == 0)
+            {
+                return null;
+            }
+
+            List<PlayerStatsResult> playersStats = new List<PlayerStatsResult>();
+
+            foreach (string steamId in matchPlayerModels.Select(mp => mp.SteamId).Distinct())
+            {
+                playersStats.Add(matchPlayerModels.Where(mp => mp.SteamId == steamId)
+                    .Aggregate(new PlayerStatsResult(), (result, model) =>
+                    {
+                        result.SteamId = model.SteamId;
+                        result.Name = model.Name;
+                        result.Kills += model.Kills;
+                        result.Deaths += model.Deaths;
+
+                        return result;
+                    }));
+            }
+
+            return playersStats.OrderByDescending(ps => ps.Kills / (float) ps.Deaths)
+                .Skip(startingIndex).Take(pageSize).ToList();
         }
     }
 }
