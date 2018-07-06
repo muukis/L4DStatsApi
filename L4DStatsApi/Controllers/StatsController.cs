@@ -48,7 +48,7 @@ namespace L4DStatsApi.Controllers
         [HttpPost]
         [Route("match/start")]
         [SwaggerOperation("StartMatch")]
-        [SwaggerResponse(200, typeof(void))]
+        [SwaggerResponse(200, typeof(MatchStartedResult), "Match ID")]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         public async Task<IActionResult> StartMatch([FromBody] MatchStartBody matchStart)
@@ -61,7 +61,6 @@ namespace L4DStatsApi.Controllers
             {
                 return Error(new ErrorResult
                 {
-                    Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed to start match"
                 });
@@ -89,7 +88,6 @@ namespace L4DStatsApi.Controllers
             {
                 return Error(new ErrorResult
                 {
-                    Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed saving match statistics"
                 });
@@ -117,7 +115,6 @@ namespace L4DStatsApi.Controllers
             {
                 return Error(new ErrorResult
                 {
-                    Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed to end match"
                 });

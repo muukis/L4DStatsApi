@@ -15,5 +15,7 @@ namespace L4DStatsApi.Interfaces
         Task EndMatch(ApiUserIdentityContainer apiUserIdentity, MatchEndBody matchEnd);
         Task<PlayerStatsResult> GetPlayerStats(string steamId, Func<MatchPlayerModel, bool> additionalValidation = null);
         Task<List<PlayerStatsResult>> GetPlayers(int startingIndex, int pageSize, Func<MatchPlayerModel, bool> additionalValidation = null);
+        Task<MatchStatsWithPlayersResult> GetMatchStatsWithPlayers(Guid matchId);
+        Task<MultipleMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey);
     }
 }

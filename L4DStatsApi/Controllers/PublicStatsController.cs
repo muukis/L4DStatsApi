@@ -31,13 +31,14 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Get player game statistics globally.
         /// </summary>
+        /// <param name="steamId">Player Steam ID.</param>
+        /// <returns><see cref="PlayerStatsResult"/> object.</returns>
         [HttpGet]
         [Route("player/{steamId}")]
         [SwaggerOperation("GetPlayerStats")]
         [SwaggerResponse(200, typeof(PlayerStatsResult), "Player statistics")]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        [SwaggerResponse(900, typeof(ErrorResult), "Player not found")]
+        [SwaggerResponse(404, typeof(ErrorResult), "Player not found")]
         public async Task<IActionResult> GetPlayerStats([FromRoute] string steamId)
         {
             try
@@ -48,7 +49,6 @@ namespace L4DStatsApi.Controllers
                 {
                     return Error(new ErrorResult
                     {
-                        Code = 900,
                         Classification = ErrorClassification.EntityNotFound,
                         Message = "Player not found"
                     }, HttpStatusCode.NotFound);
@@ -60,7 +60,6 @@ namespace L4DStatsApi.Controllers
             {
                 return Error(new ErrorResult
                 {
-                    Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed getting player statistics"
                 });
@@ -70,13 +69,15 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Get player game statistics from a group of game servers.
         /// </summary>
+        /// <param name="steamId">Player Steam ID.</param>
+        /// <param name="gameServerGroupPublicKey">Game server group public key.</param>
+        /// <returns><see cref="PlayerStatsResult"/> object.</returns>
         [HttpGet]
         [Route("player/{steamId}/gameservergroup/{gameServerGroupPublicKey}")]
         [SwaggerOperation("GetGameServerGroupPlayerStats")]
         [SwaggerResponse(200, typeof(PlayerStatsResult), "Player statistics")]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        [SwaggerResponse(900, typeof(ErrorResult), "Player not found")]
+        [SwaggerResponse(404, typeof(ErrorResult), "Player not found")]
         public async Task<IActionResult> GetGameServerGroupPlayerStats([FromRoute] string steamId, [FromRoute] Guid gameServerGroupPublicKey)
         {
             try
@@ -87,7 +88,6 @@ namespace L4DStatsApi.Controllers
                 {
                     return Error(new ErrorResult
                     {
-                        Code = 900,
                         Classification = ErrorClassification.EntityNotFound,
                         Message = "Player not found"
                     }, HttpStatusCode.NotFound);
@@ -99,7 +99,6 @@ namespace L4DStatsApi.Controllers
             {
                 return Error(new ErrorResult
                 {
-                    Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed getting player statistics"
                 });
@@ -109,13 +108,15 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Get player game statistics from a single game server.
         /// </summary>
+        /// <param name="steamId">Player Steam ID.</param>
+        /// <param name="gameServerPublicKey">Game server public key.</param>
+        /// <returns><see cref="PlayerStatsResult"/> object.</returns>
         [HttpGet]
         [Route("player/{steamId}/gameserver/{gameServerPublicKey}")]
         [SwaggerOperation("GetGameServerPlayerStats")]
         [SwaggerResponse(200, typeof(PlayerStatsResult), "Player statistics")]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        [SwaggerResponse(900, typeof(ErrorResult), "Player not found")]
+        [SwaggerResponse(404, typeof(ErrorResult), "Player not found")]
         public async Task<IActionResult> GetGameServerPlayerStats([FromRoute] string steamId, [FromRoute] Guid gameServerPublicKey)
         {
             try
@@ -126,7 +127,6 @@ namespace L4DStatsApi.Controllers
                 {
                     return Error(new ErrorResult
                     {
-                        Code = 900,
                         Classification = ErrorClassification.EntityNotFound,
                         Message = "Player not found"
                     }, HttpStatusCode.NotFound);
@@ -138,7 +138,6 @@ namespace L4DStatsApi.Controllers
             {
                 return Error(new ErrorResult
                 {
-                    Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed getting player statistics"
                 });
@@ -148,20 +147,27 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Get player game statistics globally.
         /// </summary>
+        /// <param name="startingIndex">Starting index. (starting from zero)</param>
+        /// <param name="pageSize">Page size.</param>
+        /// <returns>List of <see cref="PlayerStatsResult"/> object.</returns>
         [HttpGet]
         [Route("player/{startingIndex}/{pageSize}")]
         [SwaggerOperation("GetPlayers")]
         [SwaggerResponse(200, typeof(List<PlayerStatsResult>), "List of player statistics")]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        [SwaggerResponse(900, typeof(ErrorResult), "Players not found")]
+        [SwaggerResponse(404, typeof(ErrorResult), "Players not found")]
         public async Task<IActionResult> GetPlayersStats([FromRoute] int startingIndex, [FromRoute] int pageSize)
         {
             try
             {
+                if (startingIndex < 0)
+                {
+                    throw new ArgumentException($"Invalid starting index value ({startingIndex})", nameof(startingIndex));
+                }
+
                 if (pageSize > this.maxPageSize)
                 {
-                    throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})");
+                    throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
                 }
 
                 var playerStats = await service.GetPlayers(startingIndex, pageSize);
@@ -170,7 +176,6 @@ namespace L4DStatsApi.Controllers
                 {
                     return Error(new ErrorResult
                     {
-                        Code = 900,
                         Classification = ErrorClassification.EntityNotFound,
                         Message = "Player not found"
                     }, HttpStatusCode.NotFound);
@@ -182,7 +187,6 @@ namespace L4DStatsApi.Controllers
             {
                 return Error(new ErrorResult
                 {
-                    Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed getting player statistics"
                 });
@@ -192,20 +196,28 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Get player game statistics from a group of game servers.
         /// </summary>
+        /// <param name="startingIndex">Starting index. (starting from zero)</param>
+        /// <param name="pageSize">Page size.</param>
+        /// <param name="gameServerGroupPublicKey">Game server group public key</param>
+        /// <returns>List of <see cref="PlayerStatsResult"/> objects.</returns>
         [HttpGet]
         [Route("player/{startingIndex}/{pageSize}/gameservergroup/{gameServerGroupPublicKey}")]
         [SwaggerOperation("GetGameServerGroupPlayersStats")]
         [SwaggerResponse(200, typeof(List<PlayerStatsResult>), "List of player statistics")]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        [SwaggerResponse(900, typeof(ErrorResult), "Player not found")]
+        [SwaggerResponse(404, typeof(ErrorResult), "Player not found")]
         public async Task<IActionResult> GetGameServerGroupPlayersStats([FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] Guid gameServerGroupPublicKey)
         {
             try
             {
+                if (startingIndex < 0)
+                {
+                    throw new ArgumentException($"Invalid starting index value ({startingIndex})", nameof(startingIndex));
+                }
+
                 if (pageSize > this.maxPageSize)
                 {
-                    throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})");
+                    throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
                 }
 
                 var playerStats = await service.GetPlayers(startingIndex, pageSize, mp => mp.Match.GameServer.Group.PublicKey == gameServerGroupPublicKey);
@@ -214,7 +226,6 @@ namespace L4DStatsApi.Controllers
                 {
                     return Error(new ErrorResult
                     {
-                        Code = 900,
                         Classification = ErrorClassification.EntityNotFound,
                         Message = "Player not found"
                     }, HttpStatusCode.NotFound);
@@ -226,7 +237,6 @@ namespace L4DStatsApi.Controllers
             {
                 return Error(new ErrorResult
                 {
-                    Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed getting player statistics"
                 });
@@ -236,20 +246,28 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Get player game statistics from a single game server.
         /// </summary>
+        /// <param name="startingIndex">Starting index. (starting from zero)</param>
+        /// <param name="pageSize">Page size.</param>
+        /// <param name="gameServerPublicKey">Game server public key.</param>
+        /// <returns>List of <see cref="PlayerStatsResult"/> objects.</returns>
         [HttpGet]
         [Route("player/{startingIndex}/{pageSize}/gameserver/{gameServerPublicKey}")]
         [SwaggerOperation("GetGameServerPlayersStats")]
         [SwaggerResponse(200, typeof(List<PlayerStatsResult>), "List of player statistics")]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        [SwaggerResponse(900, typeof(ErrorResult), "Player not found")]
+        [SwaggerResponse(404, typeof(ErrorResult), "Player not found")]
         public async Task<IActionResult> GetGameServerPlayersStats([FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] Guid gameServerPublicKey)
         {
             try
             {
+                if (startingIndex < 0)
+                {
+                    throw new ArgumentException($"Invalid starting index value ({startingIndex})", nameof(startingIndex));
+                }
+
                 if (pageSize > this.maxPageSize)
                 {
-                    throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})");
+                    throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
                 }
 
                 var playerStats = await service.GetPlayers(startingIndex, pageSize, mp => mp.Match.GameServer.PublicKey == gameServerPublicKey);
@@ -258,7 +276,6 @@ namespace L4DStatsApi.Controllers
                 {
                     return Error(new ErrorResult
                     {
-                        Code = 900,
                         Classification = ErrorClassification.EntityNotFound,
                         Message = "Player not found"
                     }, HttpStatusCode.NotFound);
@@ -270,9 +287,97 @@ namespace L4DStatsApi.Controllers
             {
                 return Error(new ErrorResult
                 {
-                    Code = 500,
                     Classification = ErrorClassification.InternalError,
                     Message = "Failed getting player statistics"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Get match statistics.
+        /// </summary>
+        /// <param name="matchId">Match identifier.</param>
+        /// <returns><see cref="MatchStatsWithPlayersResult"/> object.</returns>
+        [HttpGet]
+        [Route("match/{matchId}")]
+        [SwaggerOperation("GetMatchStats")]
+        [SwaggerResponse(200, typeof(MatchStatsWithPlayersResult), "Match statistics")]
+        [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
+        [SwaggerResponse(404, typeof(ErrorResult), "Match not found")]
+        public async Task<IActionResult> GetMatchStats([FromRoute] Guid matchId)
+        {
+            try
+            {
+                var matchStatsResult = await service.GetMatchStatsWithPlayers(matchId);
+
+                if (matchStatsResult == null)
+                {
+                    return Error(new ErrorResult
+                    {
+                        Classification = ErrorClassification.EntityNotFound,
+                        Message = "Match not found"
+                    }, HttpStatusCode.NotFound);
+                }
+
+                return Ok(matchStatsResult);
+            }
+            catch (Exception)
+            {
+                return Error(new ErrorResult
+                {
+                    Classification = ErrorClassification.InternalError,
+                    Message = "Failed to end match"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Get game server match statistics.
+        /// </summary>
+        /// <param name="startingIndex">Starting index. (starting from zero)</param>
+        /// <param name="pageSize">Page size.</param>
+        /// <param name="gameServerPublicKey">Game server public key.</param>
+        /// <returns><see cref="MultipleMatchStatsResult"/> object.</returns>
+        [HttpGet]
+        [Route("match/{startingIndex}/{pageSize}/gameserver/{gameServerPublicKey}")]
+        [SwaggerOperation("GetGameServerMatchStats")]
+        [SwaggerResponse(200, typeof(MultipleMatchStatsResult), "List of match statistics")]
+        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
+        [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
+        [SwaggerResponse(404, typeof(ErrorResult), "Game server matches not found")]
+        public async Task<IActionResult> GetGameServerMatchStats([FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] Guid gameServerPublicKey)
+        {
+            try
+            {
+                if (startingIndex < 0)
+                {
+                    throw new ArgumentException($"Invalid starting index value ({startingIndex})", nameof(startingIndex));
+                }
+
+                if (pageSize > this.maxPageSize)
+                {
+                    throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
+                }
+
+                var gameServerMatchStatsResult = await service.GetGameServerMatchStats(startingIndex, pageSize, gameServerPublicKey);
+
+                if (gameServerMatchStatsResult == null)
+                {
+                    return Error(new ErrorResult
+                    {
+                        Classification = ErrorClassification.EntityNotFound,
+                        Message = "Game server matches not found"
+                    }, HttpStatusCode.NotFound);
+                }
+
+                return Ok(gameServerMatchStatsResult);
+            }
+            catch (Exception)
+            {
+                return Error(new ErrorResult
+                {
+                    Classification = ErrorClassification.InternalError,
+                    Message = "Failed to end match"
                 });
             }
         }

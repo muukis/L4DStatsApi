@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Net;
+using L4DStatsApi.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace L4DStatsApi.Controllers
@@ -36,6 +37,11 @@ namespace L4DStatsApi.Controllers
         /// <returns>The created Microsoft.AspNetCore.Mvc.ObjectResult for the response.</returns>
         protected ObjectResult Error(object value, HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
         {
+            if (value is ErrorResult result && result.Code == 0)
+            {
+                result.Code = (int) statusCode;
+            }
+
             return new ObjectResult(value)
             {
                 StatusCode = (int)statusCode

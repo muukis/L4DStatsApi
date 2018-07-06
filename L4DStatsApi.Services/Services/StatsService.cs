@@ -115,7 +115,7 @@ namespace L4DStatsApi.Services
                 return null;
             }
 
-            return matchPlayerModels.Aggregate(new PlayerStatsResult(), (result, model) =>
+            var playerStats = matchPlayerModels.Aggregate(new PlayerStatsResult(), (result, model) =>
             {
                 result.SteamId = model.SteamId;
                 result.Name = model.Name;
@@ -124,6 +124,8 @@ namespace L4DStatsApi.Services
 
                 return result;
             });
+
+            return playerStats;
         }
 
         public async Task<List<PlayerStatsResult>> GetPlayers(int startingIndex, int pageSize, Func<MatchPlayerModel, bool> additionalValidation = null)
@@ -161,6 +163,84 @@ namespace L4DStatsApi.Services
 
             return playersStats.OrderByDescending(ps => ps.Kills / (float) ps.Deaths)
                 .Skip(startingIndex).Take(pageSize).ToList();
+        }
+
+        public async Task<MatchStatsWithPlayersResult> GetMatchStatsWithPlayers(Guid matchId)
+        {
+            var match = await this.dbContext.Match
+                .Include(m => m.GameServer)
+                .Include(m => m.Players)
+                .Where(m => m.Id == matchId
+                            && m.GameServer.IsValid
+                            && m.GameServer.Group.IsValid)
+                .SingleOrDefaultAsync();
+
+            if (match == null)
+            {
+                return null;
+            }
+
+            return new MatchStatsWithPlayersResult
+            {
+                GameServerName = match.GameServer.Name,
+                MatchId = match.Id,
+                MapName = match.MapName,
+                MatchType = match.Type,
+                MatchStartTime = match.StartTime ?? DateTime.MinValue,
+                LastActiveTime = match.LastActive ?? DateTime.MinValue,
+                HasEnded = match.HasEnded,
+                Players = match.Players.Select(p => new PlayerStatsResult
+                {
+                    SteamId = p.SteamId,
+                    Name = p.Name,
+                    Kills = p.Kills,
+                    Deaths = p.Deaths
+                }).ToList()
+            };
+        }
+
+        public async Task<MultipleMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey)
+        {
+            var gameServer = await this.dbContext.GameServer
+                .Where(gs => gs.PublicKey == gameServerPublicKey 
+                             && gs.IsValid 
+                             && gs.Group.IsValid)
+                .SingleOrDefaultAsync();
+
+            if (gameServer == null)
+            {
+                return null;
+            }
+
+            var gameServerMatches = await this.dbContext.Match
+                .Where(m => m.GameServer.PublicKey == gameServerPublicKey)
+                .OrderBy(m => m.StartTime)
+                .Skip(startingIndex).Take(pageSize)
+                .ToListAsync();
+
+            if (gameServerMatches.Count == 0)
+            {
+                return null;
+            }
+
+            int totalMatchCount = await this.dbContext.Match
+                .Where(m => m.GameServerId == gameServer.Id)
+                .CountAsync();
+
+            return new MultipleMatchStatsResult
+            {
+                GameServerName = gameServerMatches[0].GameServer.Name,
+                TotalMatchCount = totalMatchCount,
+                Matches = gameServerMatches.Select(m => new MatchStatsResult
+                {
+                    MatchId = m.Id,
+                    MapName = m.MapName,
+                    MatchType = m.Type,
+                    MatchStartTime = m.StartTime ?? DateTime.MinValue,
+                    LastActiveTime = m.LastActive ?? DateTime.MinValue,
+                    HasEnded = m.HasEnded
+                }).ToList()
+            };
         }
     }
 }

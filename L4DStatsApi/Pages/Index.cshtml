@@ -6,7 +6,19 @@
     <title>Pilssi API</title>
     <meta charset="UTF-8">
 </head>
-<body>
-    Pilssi API
+<body style="font-family: arial">
+    <h1 style="color:darkslateblue">Pilssi API</h1>
+    @{
+#if DEBUG
+        var gameServerGroupPrivateKey = Guid.Parse("66edfde5-54d6-4a4d-91b6-40209eb9414c");
+        var gameServerPrivateKey = Guid.Parse("4b12123c-896c-4e01-b966-a2cf57b63357");
+
+        <h2 style="color: darkblue">THIS API IS A DEVELOPMENT PLAYGROUND!</h2>
+        <br />
+        <div style="font-weight: bold">You can use these credentials for testing:</div>
+        <div><span style="color: darkblue">gameServerGroupPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerGroupPrivateKey" /></div>
+        <div><span style="color: darkblue">gameServerPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerPrivateKey" /></div>
+#endif
+    }
 </body>
 </html>
