@@ -35,19 +35,13 @@ namespace L4DStatsApi.Services
                 Type = matchStart.MatchType
             };
 
-            // Remove all game server matches that are not ended (shouldn't be any?)
-            var matchesToRemove = await this.dbContext.Match
-                .Include(m => m.Players)
+            var matchesToEnd = await this.dbContext.Match
                 .Where(m => !m.HasEnded
                             && m.GameServerId == apiUserIdentity.GameServerIdentifier
                             && m.GameServer.GroupId == apiUserIdentity.GameServerGroupIdentifier)
                 .ToListAsync();
 
-            matchesToRemove.ForEach(m =>
-            {
-                this.dbContext.MatchPlayer.RemoveRange(m.Players);
-                this.dbContext.Match.Remove(m);
-            });
+            matchesToEnd.ForEach(m => m.HasEnded = true);
 
             await this.dbContext.Match.AddAsync(matchModel);
             await this.dbContext.SaveChangesAsync();

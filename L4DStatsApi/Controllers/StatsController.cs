@@ -41,7 +41,7 @@ namespace L4DStatsApi.Controllers
         }
 
         /// <summary>
-        /// Start a match. Starting a match will remove all data related to matches that has not ended!
+        /// Start a match. Starting a match will all game server matches that has not ended!
         /// </summary>
         /// <param name="matchStart">Match starting properties. <see cref="MatchStatsBody"/></param>
         /// <returns><see cref="MatchStartedResult"/> object.</returns>

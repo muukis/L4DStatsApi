@@ -18,7 +18,33 @@
         <div style="font-weight: bold">You can use these credentials for testing:</div>
         <div><span style="color: darkblue">gameServerGroupPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerGroupPrivateKey" /></div>
         <div><span style="color: darkblue">gameServerPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerPrivateKey" /></div>
+        <br /><br />
 #endif
+
+        var gameServerGroups = await @Model.GetGameServerGroups();
+
+        <h3 style="color: darkblue">Game server groups (gameServerGroupPublicKey):</h3>
+        foreach (var gameServerGroup in gameServerGroups)
+        {
+            <div>@gameServerGroup.PublicKey</div>
+
+            var gameServers = await @Model.GetGameServers(gameServerGroup.PublicKey);
+
+            foreach (var gameServer in gameServers)
+            {
+                <div style="padding-left: 20px"><span style="font-weight: bold">@gameServer.Name</span>: @gameServer.PublicKey</div>
+            }
+        }
+
+        <br /><br />
+
+        var ongoingMatches = await @Model.GetOngoingMatches();
+
+        <h3 style="color: darkblue">Ongoing matches (matchId):</h3>
+        foreach (var ongoingMatche in ongoingMatches)
+        {
+            <div>@ongoingMatche.Id</div>
+        }
     }
 </body>
 </html>
