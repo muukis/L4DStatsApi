@@ -30,10 +30,10 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Get API user identity.
         /// </summary>
-        /// <returns><see cref="ApiUserIdentityContainer"/> object</returns>
-        protected ApiUserIdentityContainer GetApiUserIdentityContainer()
+        /// <returns><see cref="GameServerIdentityContainer"/> object</returns>
+        protected GameServerIdentityContainer GetApiUserIdentityContainer()
         {
-            return new ApiUserIdentityContainer
+            return new GameServerIdentityContainer
             {
                 GameServerIdentifier = Guid.Parse(GetApiUserClaimValue("GameServerIdentifier")),
                 GameServerGroupIdentifier = Guid.Parse(GetApiUserClaimValue("GameServerGroupIdentifier"))
@@ -41,7 +41,7 @@ namespace L4DStatsApi.Controllers
         }
 
         /// <summary>
-        /// Start a match.
+        /// Start a match. Starting a match will remove all data related to matches that has not ended!
         /// </summary>
         /// <param name="matchStart">Match starting properties. <see cref="MatchStatsBody"/></param>
         /// <returns><see cref="MatchStartedResult"/> object.</returns>

@@ -29,10 +29,10 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Create TESTING identity token
         /// </summary>
-        /// <returns><see cref="BearerTokenResult"/> object</returns>
+        /// <returns><see cref="GameSeverIdentityResult"/> object</returns>
         [HttpGet]
         [SwaggerOperation("CreateTestingBearerToken")]
-        [SwaggerResponse(200, typeof(string), "Returns testing identity token for the stats API.")]
+        [SwaggerResponse(200, typeof(GameSeverIdentityResult), "Returns a game server testing identity token for the stats API.")]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         [SwaggerResponse(900, typeof(ErrorResult), "Invalid login")]
@@ -40,7 +40,7 @@ namespace L4DStatsApi.Controllers
         {
             try
             {
-                var token = await service.CreateBearerToken(new LoginBody
+                var token = await service.CreateGameServerIdentityToken(new LoginBody
                 {
                     GameServerGroupPrivateKey = Guid.Parse("66edfde5-54d6-4a4d-91b6-40209eb9414c"),
                     GameServerPrivateKey = Guid.Parse("4b12123c-896c-4e01-b966-a2cf57b63357")
@@ -73,18 +73,18 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Create identity token
         /// </summary>
-        /// <returns><see cref="BearerTokenResult"/> object</returns>
+        /// <returns><see cref="GameSeverIdentityResult"/> object</returns>
         [HttpPost]
-        [SwaggerOperation("CreateBearerToken")]
-        [SwaggerResponse(200, typeof(string), "Returns identity token for the stats API.")]
+        [SwaggerOperation("CreateGameServerIdentityToken")]
+        [SwaggerResponse(200, typeof(GameSeverIdentityResult), "Returns game server identity token for the stats API.")]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         [SwaggerResponse(900, typeof(ErrorResult), "Invalid login")]
-        public async Task<IActionResult> CreateBearerToken([FromBody] LoginBody login)
+        public async Task<IActionResult> CreateGameServerIdentityToken([FromBody] LoginBody login)
         {
             try
             {
-                var token = await service.CreateBearerToken(login);
+                var token = await service.CreateGameServerIdentityToken(login);
 
                 if (token == null)
                 {

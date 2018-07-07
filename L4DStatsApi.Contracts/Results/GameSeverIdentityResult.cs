@@ -2,12 +2,12 @@
 
 namespace L4DStatsApi.Results
 {
-    public class BearerTokenResult
+    public class GameSeverIdentityResult
     {
-        public BearerTokenResult()
+        public GameSeverIdentityResult()
         { }
 
-        public BearerTokenResult(string token, Guid gameServerGroupPublicKey, Guid gameServerPublicKey)
+        public GameSeverIdentityResult(string token, Guid gameServerGroupPublicKey, Guid gameServerPublicKey)
         {
             Token = token;
             GameServerGroupPublicKey = gameServerGroupPublicKey;
