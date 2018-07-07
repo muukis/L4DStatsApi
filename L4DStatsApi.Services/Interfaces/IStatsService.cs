@@ -19,5 +19,7 @@ namespace L4DStatsApi.Interfaces
         Task<MultipleMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey);
         Task<List<GameServerResult>> GetGameServerGroupGameServers(Guid gameServerGroupPublicKey);
         Task<MatchStatsWithPlayersResult> GetGameServerLatestMatch(Guid gameServerPublicKey);
+        Task<MultipleMatchStatsWithPlayersResult> GetOngoingMatches(int startingIndex, int pageSize);
+        Task<MultipleMatchStatsWithPlayersResult> GetGameServerGroupOngoingMatches(int startingIndex, int pageSize, Guid gameServerGroupPublicKey);
     }
 }

@@ -342,7 +342,6 @@ namespace L4DStatsApi.Controllers
         [Route("gameserver/{gameServerPublicKey}/matches/{startingIndex}/{pageSize}")]
         [SwaggerOperation("GetGameServerMatchStats")]
         [SwaggerResponse(200, typeof(MultipleMatchStatsResult), "List of match statistics")]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         [SwaggerResponse(404, typeof(ErrorResult), "Game server matches not found")]
         public async Task<IActionResult> GetGameServerMatchStats([FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] Guid gameServerPublicKey)
@@ -391,7 +390,6 @@ namespace L4DStatsApi.Controllers
         [Route("gameservergroup/{gameServerGroupPublicKey}")]
         [SwaggerOperation("GetGameServerGroupGameServers")]
         [SwaggerResponse(200, typeof(List<GameServerResult>), "List of game servers")]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         [SwaggerResponse(404, typeof(ErrorResult), "Game server matches not found")]
         public async Task<IActionResult> GetGameServerGroupGameServers([FromRoute] Guid gameServerGroupPublicKey)
@@ -430,7 +428,6 @@ namespace L4DStatsApi.Controllers
         [Route("gameserver/{gameServerPublicKey}/latestmatch")]
         [SwaggerOperation("GetGameServerLatestMatch")]
         [SwaggerResponse(200, typeof(MatchStatsWithPlayersResult), "Match statistics with players")]
-        [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         [SwaggerResponse(404, typeof(ErrorResult), "Game server matches not found")]
         public async Task<IActionResult> GetGameServerLatestMatch([FromRoute] Guid gameServerPublicKey)
@@ -449,6 +446,72 @@ namespace L4DStatsApi.Controllers
                 }
 
                 return Ok(latestMatch);
+            }
+            catch (Exception)
+            {
+                return Error(new ErrorResult
+                {
+                    Classification = ErrorClassification.InternalError,
+                    Message = "Failed getting game server latest match"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Get ongoing match statistics.
+        /// </summary>
+        /// <param name="startingIndex">Starting index. (starting from zero)</param>
+        /// <param name="pageSize">Page size.</param>
+        /// <returns><see cref="MultipleMatchStatsWithPlayersResult"/> object.</returns>
+        [HttpGet]
+        [Route("match/ongoing/{startingIndex}/{pageSize}")]
+        [SwaggerOperation("GetOngoingMatches")]
+        [SwaggerResponse(200, typeof(MultipleMatchStatsWithPlayersResult), "Match statistics with players")]
+        [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
+        public async Task<IActionResult> GetOngoingMatches([FromRoute] int startingIndex, [FromRoute] int pageSize)
+        {
+            try
+            {
+                return Ok(await service.GetOngoingMatches(startingIndex, pageSize));
+            }
+            catch (Exception)
+            {
+                return Error(new ErrorResult
+                {
+                    Classification = ErrorClassification.InternalError,
+                    Message = "Failed getting game server latest match"
+                });
+            }
+        }
+
+        /// <summary>
+        /// Get ongoing match statistics.
+        /// </summary>
+        /// <param name="startingIndex">Starting index. (starting from zero)</param>
+        /// <param name="pageSize">Page size.</param>
+        /// <returns><see cref="MultipleMatchStatsWithPlayersResult"/> object.</returns>
+        [HttpGet]
+        [Route("gameservergroup/{gameServerGroupPublicKey}/match/ongoing/{startingIndex}/{pageSize}")]
+        [SwaggerOperation("GetGameServerGroupOngoingMatches")]
+        [SwaggerResponse(200, typeof(MultipleMatchStatsWithPlayersResult), "Match statistics with players")]
+        [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
+        [SwaggerResponse(404, typeof(ErrorResult), "Game server group not found")]
+        public async Task<IActionResult> GetGameServerGroupOngoingMatches([FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] Guid gameServerGroupPublicKey)
+        {
+            try
+            {
+                var matches = await service.GetGameServerGroupOngoingMatches(startingIndex, pageSize, gameServerGroupPublicKey);
+
+                if (matches == null)
+                {
+                    return Error(new ErrorResult
+                    {
+                        Classification = ErrorClassification.EntityNotFound,
+                        Message = "Game server group not found"
+                    }, HttpStatusCode.NotFound);
+                }
+
+                return Ok(matches);
             }
             catch (Exception)
             {
