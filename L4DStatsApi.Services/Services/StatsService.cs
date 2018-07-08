@@ -243,7 +243,7 @@ namespace L4DStatsApi.Services
         {
             var gameServerGroup = await this.dbContext.GameServerGroup
                 .Where(gsg => gsg.PublicKey == gameServerGroupPublicKey
-                             && gsg.IsValid)
+                              && gsg.IsValid)
                 .SingleOrDefaultAsync();
 
             if (gameServerGroup == null)
