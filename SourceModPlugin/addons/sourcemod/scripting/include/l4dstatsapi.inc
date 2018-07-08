@@ -157,9 +157,9 @@ methodmap MatchStatsRequest < JSONObject
         this.SetString("MatchId", value);
     }
 
-	property PlayerStatsRequest[] Players
+	property JSONArray Players
 	{
-        public get() { return view_as<MatchStatsRequest[]>(this.Get("Players")); }
-        public set(PlayerStatsRequest[] value) { this.Set("Players", value); }
+        public get() { return view_as<JSONArray>(this.Get("Players")); }
+        public set(JSONArray value) { this.Set("Players", value); }
     }
 };
