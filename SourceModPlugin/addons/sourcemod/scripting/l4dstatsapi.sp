@@ -6,6 +6,8 @@ HTTPClient httpClient;
 
 public void OnPluginStart()
 {
+	PrintToServer("Plugin l4dstatsapi OnPluginStart()");
+	
     httpClient = new HTTPClient("https://pilssi.dy.fi:44033/l4dstatsapi/api");
 	
 	IdentityRequest identityRequest = new IdentityRequest();
@@ -13,18 +15,23 @@ public void OnPluginStart()
 	identityRequest.SetGameServerPrivateKey("");
 	
     httpClient.Post("Identity", identityRequest, OnIdentityReceived);
+	PrintToServer("IdentityRequest posted...");
 	
 	delete identityRequest;
 }
 
 public void OnIdentityReceived(HTTPResponse response, any value)
 {
+	PrintToServer("Plugin l4dstatsapi OnIdentityReceived()");
+	
     if (response.Status != HTTPStatus_OK) {
+		PrintToServer("response.Status = %s", response.Status);
         // Failed to retrieve identity
         return;
     }
 	
     if (response.Data == null) {
+		PrintToServer("response.Data = null");
         // Invalid JSON response
         return;
     }
