@@ -5,6 +5,7 @@ using L4DStatsApi.Helpers.Database;
 using L4DStatsApi.Models;
 using L4DStatsApi.Requests;
 using L4DStatsApi.Results;
+using L4DStatsApi.Support;
 
 namespace L4DStatsApi.Interfaces
 {
@@ -14,7 +15,7 @@ namespace L4DStatsApi.Interfaces
         Task SaveMatchStats(GameServerIdentityContainer apiUserIdentity, MatchStatsBody matchStats);
         Task EndMatch(GameServerIdentityContainer apiUserIdentity, MatchEndBody matchEnd);
         Task<PlayerStatsResult> GetPlayerStats(string steamId, Func<MatchPlayerModel, bool> additionalValidation = null);
-        Task<MultiplePlayerStatsResult> GetPlayers(int startingIndex, int pageSize, Func<MatchPlayerModel, bool> additionalValidation = null);
+        Task<MultiplePlayerStatsResult> GetPlayers(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null);
         Task<MatchStatsWithPlayersResult> GetMatchStatsWithPlayers(Guid matchId);
         Task<MultipleMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey);
         Task<List<GameServerResult>> GetGameServerGroupGameServers(Guid gameServerGroupPublicKey);

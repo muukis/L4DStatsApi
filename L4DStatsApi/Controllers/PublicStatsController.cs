@@ -149,14 +149,15 @@ namespace L4DStatsApi.Controllers
         /// </summary>
         /// <param name="startingIndex">Starting index. (starting from zero)</param>
         /// <param name="pageSize">Page size.</param>
+        /// <param name="sortOrder">List sort order.</param>
         /// <returns><see cref="MultiplePlayerStatsResult"/> object.</returns>
         [HttpGet]
-        [Route("player/{startingIndex}/{pageSize}")]
+        [Route("player/{startingIndex}/{pageSize}/{sortOrder}")]
         [SwaggerOperation("GetPlayers")]
         [SwaggerResponse(200, typeof(MultiplePlayerStatsResult), "List of player statistics")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         [SwaggerResponse(404, typeof(ErrorResult), "Players not found")]
-        public async Task<IActionResult> GetPlayersStats([FromRoute] int startingIndex, [FromRoute] int pageSize)
+        public async Task<IActionResult> GetPlayersStats([FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] PlayerSortOrder sortOrder)
         {
             try
             {
@@ -170,7 +171,7 @@ namespace L4DStatsApi.Controllers
                     throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
                 }
 
-                var playerStats = await service.GetPlayers(startingIndex, pageSize);
+                var playerStats = await service.GetPlayers(startingIndex, pageSize, sortOrder);
 
                 if (playerStats == null)
                 {
@@ -196,17 +197,18 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Get player game statistics from a group of game servers.
         /// </summary>
+        /// <param name="gameServerGroupPublicKey">Game server group public key</param>
         /// <param name="startingIndex">Starting index. (starting from zero)</param>
         /// <param name="pageSize">Page size.</param>
-        /// <param name="gameServerGroupPublicKey">Game server group public key</param>
+        /// <param name="sortOrder">List sort order.</param>
         /// <returns><see cref="MultiplePlayerStatsResult"/> object.</returns>
         [HttpGet]
-        [Route("gameservergroup/{gameServerGroupPublicKey}/players/{startingIndex}/{pageSize}")]
+        [Route("gameservergroup/{gameServerGroupPublicKey}/players/{startingIndex}/{pageSize}/{sortOrder}")]
         [SwaggerOperation("GetGameServerGroupPlayersStats")]
         [SwaggerResponse(200, typeof(MultiplePlayerStatsResult), "List of player statistics")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         [SwaggerResponse(404, typeof(ErrorResult), "Player not found")]
-        public async Task<IActionResult> GetGameServerGroupPlayersStats([FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] Guid gameServerGroupPublicKey)
+        public async Task<IActionResult> GetGameServerGroupPlayersStats([FromRoute] Guid gameServerGroupPublicKey, [FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] PlayerSortOrder sortOrder)
         {
             try
             {
@@ -220,7 +222,7 @@ namespace L4DStatsApi.Controllers
                     throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
                 }
 
-                var playerStats = await service.GetPlayers(startingIndex, pageSize, mp => mp.Match.GameServer.Group.PublicKey == gameServerGroupPublicKey);
+                var playerStats = await service.GetPlayers(startingIndex, pageSize, sortOrder, mp => mp.Match.GameServer.Group.PublicKey == gameServerGroupPublicKey);
 
                 if (playerStats == null)
                 {
@@ -246,17 +248,18 @@ namespace L4DStatsApi.Controllers
         /// <summary>
         /// Get player game statistics from a single game server.
         /// </summary>
+        /// <param name="gameServerPublicKey">Game server public key.</param>
         /// <param name="startingIndex">Starting index. (starting from zero)</param>
         /// <param name="pageSize">Page size.</param>
-        /// <param name="gameServerPublicKey">Game server public key.</param>
+        /// <param name="sortOrder">List sort order.</param>
         /// <returns><see cref="MultiplePlayerStatsResult"/> object.</returns>
         [HttpGet]
-        [Route("gameserver/{gameServerPublicKey}/players/{startingIndex}/{pageSize}")]
+        [Route("gameserver/{gameServerPublicKey}/players/{startingIndex}/{pageSize}/{sortOrder}")]
         [SwaggerOperation("GetGameServerPlayersStats")]
         [SwaggerResponse(200, typeof(MultiplePlayerStatsResult), "List of player statistics")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         [SwaggerResponse(404, typeof(ErrorResult), "Player not found")]
-        public async Task<IActionResult> GetGameServerPlayersStats([FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] Guid gameServerPublicKey)
+        public async Task<IActionResult> GetGameServerPlayersStats([FromRoute] Guid gameServerPublicKey, [FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] PlayerSortOrder sortOrder)
         {
             try
             {
@@ -270,7 +273,7 @@ namespace L4DStatsApi.Controllers
                     throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
                 }
 
-                var playerStats = await service.GetPlayers(startingIndex, pageSize, mp => mp.Match.GameServer.PublicKey == gameServerPublicKey);
+                var playerStats = await service.GetPlayers(startingIndex, pageSize, sortOrder, mp => mp.Match.GameServer.PublicKey == gameServerPublicKey);
 
                 if (playerStats == null)
                 {
@@ -489,6 +492,7 @@ namespace L4DStatsApi.Controllers
         /// </summary>
         /// <param name="startingIndex">Starting index. (starting from zero)</param>
         /// <param name="pageSize">Page size.</param>
+        /// <param name="gameServerGroupPublicKey">Game server group public key.</param>
         /// <returns><see cref="MultipleMatchStatsWithPlayersResult"/> object.</returns>
         [HttpGet]
         [Route("gameservergroup/{gameServerGroupPublicKey}/match/ongoing/{startingIndex}/{pageSize}")]

@@ -137,10 +137,11 @@ namespace L4DStatsApi.Services
             return playerStats;
         }
 
-        public async Task<MultiplePlayerStatsResult> GetPlayers(int startingIndex, int pageSize, Func<MatchPlayerModel, bool> additionalValidation = null)
+        public async Task<MultiplePlayerStatsResult> GetPlayers(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null)
         {
             var matchPlayerModels =
-                await this.dbContext.MatchPlayer.Include(mp => mp.Match)
+                await this.dbContext.MatchPlayer
+                    .Include(mp => mp.Match)
                     .Where(mp => mp.Match.GameServer.IsValid
                                  && mp.Match.GameServer.Group.IsValid).ToListAsync();
 
@@ -171,7 +172,7 @@ namespace L4DStatsApi.Services
             }
 
             int totalPlayersCount = playersStats.Count;
-            playersStats = playersStats.Skip(startingIndex).Take(pageSize).ToList();
+            playersStats = playersStats.Sort(sortOrder).Skip(startingIndex).Take(pageSize).ToList();
 
             return new MultiplePlayerStatsResult
             {
