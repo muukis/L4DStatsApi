@@ -59,7 +59,6 @@ public void OnPluginEnd()
 
 public OnMapStart()
 {
-	PrintToServer("Plugin l4dstatsapi OnMapStart()");
 	new String:apiBaseUrl[1024];
 	GetConVarString(cvar_ApiBaseUrl, apiBaseUrl, sizeof(apiBaseUrl));
 
@@ -142,8 +141,6 @@ public void OnMatchStartReceived(HTTPResponse response, any value)
 
 public void OnMapEnd()
 {
-	PrintToServer("Plugin l4dstatsapi OnMapEnd()");
-
 	if (strlen(CurrentMatchId) == 0)
 	{
 		return;
@@ -232,31 +229,28 @@ public Action:ClientPostAdminCheck(Handle:timer, any:client)
 	decl String:PlayerName[MAX_LINE_WIDTH];
 	GetClientName(client, PlayerName, sizeof(PlayerName));
 
-	JSONArray players = new JSONArray();
-	
 	PlayerStatsRequest playerStatsRequest = new PlayerStatsRequest();
 	playerStatsRequest.SetSteamId(SteamID);
 	playerStatsRequest.SetName(PlayerName);
 	playerStatsRequest.Kills = 0;
 	playerStatsRequest.Deaths = 0;
 	
+	JSONArray players = new JSONArray();
 	players.Push(playerStatsRequest);
 
 	MatchStatsRequest matchStatsRequest = new MatchStatsRequest();
 	matchStatsRequest.SetMatchId(CurrentMatchId);
-	matchStatsRequest.Set("Players", players);
-	//matchStatsRequest.Players = players;
+	matchStatsRequest.Players = players;
 	
 	httpClient.Post("Stats/match", matchStatsRequest, OnMatchStatsReceived);
 	
 	delete playerStatsRequest;
-	delete matchStatsRequest.Players;
+	delete players;
 	delete matchStatsRequest;
 }
 
 public void OnMatchStatsReceived(HTTPResponse response, any value)
 {
-	PrintToServer("Plugin l4dstatsapi OnMatchStatsReceived()");
 	if (response.Status != HTTPStatus_OK) {
 		// Failed to retrieve identity
 		return;
