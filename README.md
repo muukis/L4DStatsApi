@@ -12,4 +12,4 @@ Any system that can run ASP.NET Core 2.1.
 SourceMod plugin is editable with any text editor of your liking. The REST API requires Visual Studio 2017. Not sure if Visual Code supports it though?
 
 # Notes
-My first plan is to get stats recorded from player kills and deaths. This means the plugin should work on any Source engine game (supported by SourceMod). Once I got it this far, I will branch the sources and start working on L4D specific stats. Maybe CS:GO first though, since it is a lot easier to record stats from.
+My plan is to first get stats recorded from player kills and deaths. This means the plugin should work on any Source engine game (supported by SourceMod). Once I got it this far, I will branch the sources and start working on L4D specific stats. Maybe CS:GO first though, since it is a lot easier to record stats from.
