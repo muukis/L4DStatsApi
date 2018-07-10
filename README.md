@@ -8,7 +8,7 @@ Restfulness for L4D Custom Player Stats.
 # Install instructions
 * Make sure requirements are met.
 * Either compile the plugin yourself or use the precompiled **l4dstatsapi.smx**. Copy the smx file to you sourcemod plugins folder.
-* Copy the ripext folder **CA-.crt** to your sourcemod ripext folder (overwrite the existing file).
+* Copy the ripext folder **ca-bundle.crt** to your sourcemod ripext folder (overwrite the existing file).
 * Configure the sourcemod plugin. You will need to enter at least a **GameServerGroupPrivateKey** and a **GameServerPrivateKey**.
 
 # Requirements for hosting the REST API
