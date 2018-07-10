@@ -18,5 +18,5 @@ Restfulness for L4D Custom Player Stats.
 # Development
 SourceMod plugin is editable with any text editor of your liking. The REST API requires Visual Studio 2017. Not sure if Visual Code supports it though?
 
-# Notes
-My plan is to first get stats recorded from player kills and deaths. This means the plugin should work on any Source engine game (supported by SourceMod). Once I get it that far, I will branch the sourcecodes and start working on L4D specific stats. Maybe CS:GO first though, since it is a lot easier to record stats from.
+# Roadplan
+My plan is to first get stats recorded from player kills and deaths. This means the plugin should work on any Source engine game (supported by SourceMod). Once I get it that far, I will branch the sourcecodes and start working on L4D specific stats. Maybe CS:GO first though, since it is a lot easier to record stats from. I want to record pretty much everything from who shot who and what body part was hit. Player statistics can be accessed either by globally, inside a game server group or just inside a game server. Bad behaving game servers or groups can be invalidated and statistics from those places will be removed from being visible, in addition to not allowing new stats being recorded using specific API authentication(s).
