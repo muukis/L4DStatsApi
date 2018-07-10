@@ -5,6 +5,12 @@ Restfulness for L4D Custom Player Stats.
 * SourceMod and MetaMod (https://www.sourcemod.com).
 * SourceMod extension: REST in Pawn - Communicate with JSON REST APIs (https://forums.alliedmods.net/showthread.php?t=298024).
 
+# Install instructions
+* Make sure requirements are met.
+* Either compile the plugin yourself or use the precompiled **l4dstatsapi.smx**. Copy the smx file to you sourcemod plugins folder.
+* Copy the ripext folder **CA-.crt** to your sourcemod ripext folder (overwrite the existing file).
+* Configure the sourcemod plugin. You will need to enter at least a **GameServerGroupPrivateKey** and a **GameServerPrivateKey**.
+
 # Requirements for hosting the REST API
 * Any system that can run ASP.NET Core 2.1.
 
