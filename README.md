@@ -1,9 +1,9 @@
 # L4DStatsApi
-Restfulness for L4D Custom Player Stats
+Restfulness for L4D Custom Player Stats.
 
 # Requirements for game server
-SourceMod and MetaMod (https://www.sourcemod.com)
-SourceMod extension: REST in Pawn - Communicate with JSON REST APIs (https://forums.alliedmods.net/showthread.php?t=298024)
+SourceMod and MetaMod (https://www.sourcemod.com).
+SourceMod extension: REST in Pawn - Communicate with JSON REST APIs (https://forums.alliedmods.net/showthread.php?t=298024).
 
 # Requirements for hosting the REST API
 Any system that can run ASP.NET Core 2.1.
