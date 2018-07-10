@@ -2,6 +2,7 @@
 Restfulness for L4D Custom Player Stats.
 
 # Requirements for game server
+* Valve Source game dedicated server. For now any SourceMod supported game will do.
 * SourceMod and MetaMod (https://www.sourcemod.com).
 * SourceMod extension: REST in Pawn - Communicate with JSON REST APIs (https://forums.alliedmods.net/showthread.php?t=298024).
 
