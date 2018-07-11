@@ -30,6 +30,7 @@ namespace L4DStatsApi.Services
             var matchModel = new MatchModel
             {
                 GameServerId = apiUserIdentity.GameServerIdentifier,
+                GameName = matchStart.GameName,
                 MapName = matchStart.MapName,
                 Type = matchStart.MatchType
             };

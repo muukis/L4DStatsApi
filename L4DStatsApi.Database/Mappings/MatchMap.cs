@@ -12,6 +12,7 @@ namespace L4DStatsApi.Mappings
 
             builder.Property(m => m.Id).HasDefaultValue();
             builder.Property(m => m.GameServerId).IsRequired();
+            builder.Property(m => m.GameName).HasMaxLength(64).IsRequired();
             builder.Property(m => m.MapName).HasMaxLength(100).IsRequired();
             builder.Property(m => m.Type).HasMaxLength(50).IsRequired();
             builder.Property(m => m.HasEnded).HasDefaultValue();

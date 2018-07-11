@@ -8,6 +8,7 @@ namespace L4DStatsApi.Models
         public Guid Id { get; set; }
         public Guid GameServerId { get; set; }
         public virtual GameServerModel GameServer { get; set; }
+        public string GameName { get; set; }
         public string MapName { get; set; }
         public string Type { get; set; }
         public bool HasEnded { get; set; }
