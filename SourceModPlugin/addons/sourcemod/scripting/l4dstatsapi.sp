@@ -30,7 +30,7 @@ JSONArray playerStatsRequests = null;
 
 new String:CurrentMatchId[MAX_LINE_WIDTH] = "";
 new PostAdminCheckRetryCounter[MAXPLAYERS + 1];
-new String:GameName[64];
+new String:GameName[MAX_LINE_WIDTH];
 
 // Plugin Info
 public Plugin:myinfo =
@@ -220,9 +220,6 @@ public void OnMatchEndReceived(HTTPResponse response, any value)
 	}
 	
 	CurrentMatchId = "";
-	
-	PrintToServer("Plugin l4dstatsapi OnMatchEndReceived() - delete httpClient");
-	delete httpClient;
 }
 
 public OnClientPostAdminCheck(client)
