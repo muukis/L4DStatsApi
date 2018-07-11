@@ -231,6 +231,7 @@ namespace L4DStatsApi.Services
                 Matches = gameServerMatches.Select(m => new MatchStatsResult
                 {
                     MatchId = m.Id,
+                    GameName = m.GameName,
                     MapName = m.MapName,
                     MatchType = m.Type,
                     MatchStartTime = m.StartTime ?? DateTime.MinValue,

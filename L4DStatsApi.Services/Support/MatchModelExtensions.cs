@@ -14,6 +14,7 @@ namespace L4DStatsApi.Support
                 GameServerName = match.GameServer.Name,
                 GameServerPublicKey = match.GameServer.PublicKey,
                 MatchId = match.Id,
+                GameName = match.GameName,
                 MapName = match.MapName,
                 MatchType = match.Type,
                 MatchStartTime = match.StartTime ?? DateTime.MinValue,
