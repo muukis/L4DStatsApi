@@ -21,7 +21,7 @@ namespace L4DStatsApi.Services
             this.dbContext = dbContext;
         }
 
-        public async Task<BearerTokenResult> CreateBearerToken(LoginBody login)
+        public async Task<GameSeverIdentityResult> CreateGameServerIdentityToken(LoginBody login)
         {
             var gameServer =
                 await (from gs in this.dbContext.GameServer
@@ -56,7 +56,7 @@ namespace L4DStatsApi.Services
                 .AddExpiry(int.Parse(this.configuration["IdentityService:TokenExpiry"] ?? "60"))
                 .Build();
 
-            return new BearerTokenResult(token.Value, gameServer.GameServerGroupPublicKey, gameServer.GameServerPublicKey);
+            return new GameSeverIdentityResult(token.Value, gameServer.GameServerGroupPublicKey, gameServer.GameServerPublicKey);
         }
     }
 }

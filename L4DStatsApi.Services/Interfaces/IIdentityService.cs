@@ -6,6 +6,6 @@ namespace L4DStatsApi.Interfaces
 {
     public interface IIdentityService
     {
-        Task<BearerTokenResult> CreateBearerToken(LoginBody login);
+        Task<GameSeverIdentityResult> CreateGameServerIdentityToken(LoginBody login);
     }
 }

@@ -27,7 +27,7 @@ namespace L4DStatsApi
             modelBuilder.ApplyConfiguration(new MatchPlayerMap());
         }
 
-        public async Task ValidateApiUserIdentity(ApiUserIdentityContainer apiUserIdentity)
+        public async Task ValidateGameServerIdentity(GameServerIdentityContainer apiUserIdentity)
         {
             bool isValid =
                 await (from gs in GameServer
