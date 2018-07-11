@@ -18,7 +18,7 @@
         <div><span style="color: darkblue">gameServerGroupPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerGroupPrivateKey" /></div>
         <div><span style="color: darkblue">gameServerPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerPrivateKey" /></div>
         <br/>
-        <div><a href="swagger">Swagger is online</a></div>
+        <div><a href="@Href("~/swagger")">Swagger is online</a></div>
 #endif
 
         var gameServerGroups = await @Model.GetGameServerGroups();
