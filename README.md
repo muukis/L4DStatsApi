@@ -1,19 +1,20 @@
-# L4DStatsApi
+# L4D Statistics API
 Restfulness for L4D Custom Player Stats.
 
 # Requirements for game server
-* Valve Source game dedicated server. For now any SourceMod supported game will do.
-* SourceMod and MetaMod (https://www.sourcemod.com).
-* SourceMod extension: REST in Pawn - Communicate with JSON REST APIs (https://forums.alliedmods.net/showthread.php?t=298024).
+* **Valve Source engine game dedicated server**. For now any SourceMod supported game will do.
+* **SourceMod and MetaMod** (https://www.sourcemod.com).
+* SourceMod extension: **REST in Pawn** - Communicate with JSON REST APIs (https://forums.alliedmods.net/showthread.php?t=298024).
 
-# Install instructions
+# Requirements for hosting the REST API
+* Any system that can run **ASP.NET Core 2.1**.
+* I am currently developing the API only for the **Microsoft SQL servers** (using the EF Core packages). Other databases shouldn't be too hard to add later on (https://docs.microsoft.com/en-us/ef/core/providers).
+
+# Game server SourceMod plugin install instructions
 * Make sure requirements are met.
 * Either compile the plugin yourself or use the precompiled **l4dstatsapi.smx**. Copy the smx file to you sourcemod plugins folder.
 * Copy the ripext folder **ca-bundle.crt** to your sourcemod ripext folder (overwrite the existing file).
 * Configure the sourcemod plugin. You will need to enter at least a **GameServerGroupPrivateKey** and a **GameServerPrivateKey**.
-
-# Requirements for hosting the REST API
-* Any system that can run ASP.NET Core 2.1.
 
 # Development
 SourceMod plugin is editable with any text editor of your liking. The REST API requires Visual Studio 2017. Not sure if Visual Code supports it though?
