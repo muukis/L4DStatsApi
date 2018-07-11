@@ -50,6 +50,16 @@ methodmap MatchStartRequest < JSONObject
 	// Constructor
 	public MatchStartRequest() { return view_as<MatchStartRequest>(new JSONObject()); }
 
+	public void GetGameName(char[] buffer, int maxlength)
+	{
+		this.GetString("GameName", buffer, maxlength);
+	}
+	
+	public void SetGameName(const char[] value)
+	{
+		this.SetString("GameName", value);
+	}
+
 	public void GetMapName(char[] buffer, int maxlength)
 	{
 		this.GetString("MapName", buffer, maxlength);
