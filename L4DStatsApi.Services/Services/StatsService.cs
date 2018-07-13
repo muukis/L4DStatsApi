@@ -129,6 +129,7 @@ namespace L4DStatsApi.Services
             {
                 result.SteamId = model.SteamId;
                 result.Name = model.Name;
+                result.Base64EncodedName = model.GetBase64EncodedName();
                 result.Kills += model.Kills;
                 result.Deaths += model.Deaths;
 
@@ -165,6 +166,7 @@ namespace L4DStatsApi.Services
                     {
                         result.SteamId = model.SteamId;
                         result.Name = model.Name;
+                        result.Base64EncodedName = model.GetBase64EncodedName();
                         result.Kills += model.Kills;
                         result.Deaths += model.Deaths;
 

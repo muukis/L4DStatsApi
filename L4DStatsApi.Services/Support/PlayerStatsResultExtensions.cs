@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using L4DStatsApi.Results;
 
 namespace L4DStatsApi.Support
@@ -27,9 +26,9 @@ namespace L4DStatsApi.Support
                 case PlayerSortOrder.DeathsDesc:
                     return playersStats.OrderByDescending(p => p.Deaths);
                 case PlayerSortOrder.KillDeathRatioAsc:
-                    return playersStats.OrderBy(p => p.Kills / (float)p.Deaths);
+                    return playersStats.OrderBy(p => p.Kills / (float) p.Deaths);
                 case PlayerSortOrder.KillDeathRatioDesc:
-                    return playersStats.OrderByDescending(p => p.Kills / (float)p.Deaths);
+                    return playersStats.OrderByDescending(p => p.Kills / (float) p.Deaths);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(sortOrder), sortOrder, null);
             }

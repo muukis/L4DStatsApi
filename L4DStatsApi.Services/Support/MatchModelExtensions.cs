@@ -24,6 +24,7 @@ namespace L4DStatsApi.Support
                 {
                     SteamId = p.SteamId,
                     Name = p.Name,
+                    Base64EncodedName = p.GetBase64EncodedName(),
                     Kills = p.Kills,
                     Deaths = p.Deaths
                 }).ToList()
