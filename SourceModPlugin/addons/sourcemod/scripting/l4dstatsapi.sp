@@ -102,8 +102,8 @@ public void OnPluginStart()
 	cvar_Gamemode = FindConVar("mp_gamemode");
 
 	cvar_ApiBaseUrl = CreateConVar("l4dstatsapi_apibaseurl", "https://pilssi.dy.fi:44033/l4dstatsapi/api", "Base URL for the API (example: https://pilssi.dy.fi:44033/l4dstatsapi/api)", FCVAR_PLUGIN);
-	cvar_GameServerGroupPrivateKey = CreateConVar("l4dstatsapi_gameservergroupprivatekey", "66edfde5-54d6-4a4d-91b6-40209eb9414c", "Game server group private key (example: 66edfde5-54d6-4a4d-91b6-40209eb9414c)", FCVAR_PLUGIN);
-	cvar_GameServerPrivateKey = CreateConVar("l4dstatsapi_gameserverprivatekey", "4b12123c-896c-4e01-b966-a2cf57b63357", "Game server private key (4b12123c-896c-4e01-b966-a2cf57b63357)", FCVAR_PLUGIN);
+	cvar_GameServerGroupPrivateKey = CreateConVar("l4dstatsapi_gameservergroupprivatekey", "[YOUR GAME SERVER GROUP PRIVATE KEY HERE]", "Game server group private key (example: 66edfde5-54d6-4a4d-91b6-40209eb9414c)", FCVAR_PLUGIN);
+	cvar_GameServerPrivateKey = CreateConVar("l4dstatsapi_gameserverprivatekey", "[YOUR GAME SERVER PRIVATE KEY HERE]", "Game server private key (example: 4b12123c-896c-4e01-b966-a2cf57b63357)", FCVAR_PLUGIN);
 
 	AutoExecConfig(true, "l4dstatsapi");
 
