@@ -129,14 +129,17 @@ methodmap PlayerStatsRequest < JSONObject
 		this.SetString("SteamId", value);
 	}
 
-	public void GetName(char[] buffer, int maxlength)
+	public void GetBase64EncodedName(char[] buffer, int maxlength)
 	{
-		this.GetString("Name", buffer, maxlength);
+		PrintToServer("GetBase64EncodedName() - maxlength=%d", maxlength);
+		this.GetString("Base64EncodedName", buffer, maxlength);
+		PrintToServer("GetBase64EncodedName() - buffer=%s", buffer);
 	}
 	
-	public void SetName(const char[] value)
+	public void SetBase64EncodedName(const char[] value)
 	{
-		this.SetString("Name", value);
+		PrintToServer("SetBase64EncodedName(%s)", value);
+		this.SetString("Base64EncodedName", value);
 	}
 
 	property int Kills
