@@ -83,7 +83,7 @@ namespace L4DStatsApi.Services
                 {
                     MatchId = matchStats.MatchId,
                     SteamId = ps.SteamId,
-                    Name = ps.Name,
+                    Name = ps.GetBase64DecodedName(),
                     Kills = ps.Kills,
                     Deaths = ps.Deaths
                 }).ToList();

@@ -7,7 +7,7 @@ namespace L4DStatsApi.Requests
         [Required]
         public string SteamId { get; set; }
         [Required]
-        public string Name { get; set; }
+        public string Base64EncodedName { get; set; }
         [Required]
         public int Kills { get; set; }
         [Required]
