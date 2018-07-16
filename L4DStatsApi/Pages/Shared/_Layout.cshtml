@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - L4D Stats API</title>
+</head>
+<body>
+<div>
+    <ul>
+        <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <li><a asp-area="" asp-controller="Admin" asp-action="Index">Server Administration</a></li>
+        }
+        else
+        {
+            <li>Server Administration</li>
+        }
+        @if (User.Identity.IsAuthenticated)
+        {
+            <li><a asp-area="" asp-controller="Auth" asp-action="SignOut">Sign out</a> (@User.Claims.Single(c => c.Type.EndsWith("emailaddress")).Value)</li>
+        }
+        else
+        {
+            <li><a asp-area="" asp-controller="Auth" asp-action="SignIn">Login</a></li>
+        }
+    </ul>
+</div>
+<div>
+    @RenderBody()
+    @RenderSection("Scripts", false)
+</div>
+</body>
+</html>

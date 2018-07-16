@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 
 namespace L4DStatsApi.Controllers
@@ -16,15 +18,21 @@ namespace L4DStatsApi.Controllers
 
         public async Task<IActionResult> Login()
         {
-            var allSchemeProvider = (await this.authenticationSchemeProvider.GetAllSchemesAsync())
-                .Select(o => o.DisplayName).Where(o => !string.IsNullOrEmpty(o));
-            
+            var allSchemeProvider = (await authenticationSchemeProvider.GetAllSchemesAsync())
+                .Select(n => n.DisplayName).Where(n => !String.IsNullOrEmpty(n));
+
             return View(allSchemeProvider);
         }
 
-        public IActionResult SignIn(string provider)
+        public IActionResult SignIn(String provider)
         {
-            return Challenge(new AuthenticationProperties {RedirectUri = "/"}, provider);
+            return Challenge(new AuthenticationProperties { RedirectUri = "/" }, provider);
+        }
+
+        public async Task<IActionResult> SignOut()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
         }
     }
 }

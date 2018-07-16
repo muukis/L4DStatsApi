@@ -1,13 +1,11 @@
 ﻿@page
 @model L4DStatsApi.Pages.IndexModel
+@{
+    ViewData["Title"] = "Frontpage";
+}
 
-<html>
-<head>
-    <title>Pilssi API - L4D Stats API</title>
-    <meta charset="UTF-8">
-</head>
-<body style="font-family: arial">
     <h1 style="color:darkslateblue">Pilssi API - L4D Stats API</h1>
+
     @{
 #if DEBUG
         var gameServerGroupPrivateKey = Guid.Parse("66edfde5-54d6-4a4d-91b6-40209eb9414c");
@@ -17,7 +15,7 @@
         <div style="font-weight: bold">You can use these credentials for testing:</div>
         <div><span style="color: darkblue">gameServerGroupPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerGroupPrivateKey" /></div>
         <div><span style="color: darkblue">gameServerPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerPrivateKey" /></div>
-        <br/>
+        <br />
         <div><a href="@Href("~/swagger")">Swagger is online</a></div>
 #endif
 
@@ -44,5 +42,3 @@
             <div>@ongoingMatche.Id</div>
         }
     }
-</body>
-</html>
