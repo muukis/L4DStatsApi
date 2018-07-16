@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using L4DStatsApi.Helpers.Database;
 using L4DStatsApi.Mappings;
@@ -76,5 +77,25 @@ namespace L4DStatsApi
 
             return match;
         }
+
+        public async Task<GameServerGroupModel> GetUserGameServerGroup(ClaimsPrincipal user)
+        {
+            if (!user.Identity.IsAuthenticated)
+            {
+                return null;
+            }
+
+            string emailAddress = user.Claims.Single(c => c.Type.EndsWith("emailaddress")).Value;
+
+            return await GameServerGroup
+                .SingleOrDefaultAsync(gsg => gsg.EmailAddress.Equals(emailAddress));
+        }
+
+        public async Task<string> GetUserEmailAddress(ClaimsPrincipal user)
+        {
+            var gameServerGroup = await GetUserGameServerGroup(user);
+            return gameServerGroup?.EmailAddress;
+        }
+
     }
 }

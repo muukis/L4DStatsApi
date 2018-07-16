@@ -2,6 +2,18 @@
 @model L4DStatsApi.Pages.Admin.IndexModel
 @{
     ViewData["Title"] = "Server Administration";
+    var myGameServerGroup = await Model.GetUserGameServerGroup();
 }
 
 <h1>Server Administration</h1>
+@if (myGameServerGroup != null)
+{
+    <div>YOU HAVE A SERVER GROUP</div>
+}
+else
+{
+    <div>NO SERVER GROUP</div>
+    <div>
+        <a asp-area="" asp-controller="Admin" asp-action="CreateGameServerGroup">Create my new game server group!</a>
+    </div>
+}

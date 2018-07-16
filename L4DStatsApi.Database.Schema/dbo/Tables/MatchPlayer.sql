@@ -9,3 +9,11 @@
     PRIMARY KEY CLUSTERED ([Id] ASC), 
     CONSTRAINT [FK_MatchPlayer_ToTable] FOREIGN KEY ([MatchId]) REFERENCES [Match]([Id])
 )
+
+GO
+
+CREATE INDEX [IX_MatchPlayer_SteamId] ON [dbo].[MatchPlayer] ([SteamId])
+
+GO
+
+CREATE INDEX [IX_MatchPlayer_Name] ON [dbo].[MatchPlayer] ([Name])

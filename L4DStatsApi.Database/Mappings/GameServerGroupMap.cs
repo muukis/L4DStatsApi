@@ -15,6 +15,7 @@ namespace L4DStatsApi.Mappings
             builder.Property(gsg => gsg.Id).HasDefaultValue();
             builder.Property(gsg => gsg.PrivateKey).HasDefaultValue();
             builder.Property(gsg => gsg.PublicKey).HasDefaultValue();
+            builder.Property(gsg => gsg.EmailAddress).IsRequired();
             builder.Property(gsg => gsg.IsActive).HasDefaultValue();
             builder.Property(gsg => gsg.IsValid).HasDefaultValue();
 
