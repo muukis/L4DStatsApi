@@ -1,0 +1,28 @@
+﻿@page
+@model L4DStatsApi.Pages.ServerAdmin.IndexModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Game Server Admin</title>
+</head>
+<body>
+<h1>Game Server Admin</h1>
+<h2>https://www.youtube.com/watch?v=qL3tZ6yHWMA</h2>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <h2 style="color: green;">YOU ARE AUTHENTICATED</h2>
+        <div><a asp-area="" asp-controller="Auth" asp-action="SignOut"></a></div>
+    }
+    else
+    {
+        <h2 style="color: red;">YOU ARE NOT AUTHENTICATED</h2>
+    }
+</body>
+</html>

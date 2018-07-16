@@ -1,0 +1,10 @@
+﻿@model IEnumerable<string>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "Login";
+}
+
+@foreach (string item in Model)
+{
+    <a asp-action="SignIn" asp-route-provider="@item">@item</a>
+}

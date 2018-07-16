@@ -2,6 +2,8 @@
 using L4DStatsApi.Interfaces;
 using L4DStatsApi.Services;
 using L4DStatsApi.Support;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -75,18 +77,18 @@ namespace L4DStatsApi
                     };
                 });
 
-            //services.AddAuthentication(options =>
-            //    {
-            //        options.DefaultChallengeScheme = FacebookDefaults.AuthenticationScheme;
-            //        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            //        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            //    })
-            //    .AddFacebook(options =>
-            //    {
-            //        options.AppId = Configuration["Authentication:Facebook:AppId"];
-            //        options.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
-            //    })
-            //    .AddCookie();
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultChallengeScheme = FacebookDefaults.AuthenticationScheme;
+                    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddFacebook(options =>
+                {
+                    options.AppId = Configuration["Authentication:Facebook:AppId"];
+                    options.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
+                })
+                .AddCookie();
 
             services.AddAuthorization(options =>
             {
@@ -105,11 +107,11 @@ namespace L4DStatsApi
                 .AddJsonOptions(options =>
                 {
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
-                })
-                .AddRazorPagesOptions(options =>
-                {
-                    options.Conventions.AuthorizeFolder("/GameServerManager");
                 });
+                //.AddRazorPagesOptions(options =>
+                //{
+                //    options.Conventions.AuthorizeFolder("/ServerAdmin");
+                //});
 
             services.AddCors(options => options.AddPolicy("AllowOrigin", builder => builder.AllowAnyOrigin()));
 
