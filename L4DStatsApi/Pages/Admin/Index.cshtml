@@ -1,4 +1,5 @@
 ﻿@page
+@using Models
 @model L4DStatsApi.Pages.Admin.IndexModel
 @{
     ViewData["Title"] = "Server Administration";
@@ -6,14 +7,59 @@
 }
 
 <h1>Server Administration</h1>
+@if (Model.ErrorMessage != null)
+{
+    <div style="color: red; font-weight: bold">@Model.ErrorMessage</div>
+}
 @if (myGameServerGroup != null)
 {
-    <div>YOU HAVE A SERVER GROUP</div>
+    var myValidGameServers = myGameServerGroup.GameServers?.Where(gs => gs.IsValid).ToList();
+    var myGameServerCount = Model.GetUserGameServerCount();
+    var maxGameServerCount = Model.GetMaxGameServersPerGroup();
+
+    <h2>Game server group keys</h2>
+    <div><span style="color: darkblue">gameServerGroupPrivateKey:</span> <input type="text" style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@myGameServerGroup.PrivateKey"/></div>
+    <div><span style="color: darkblue">gameServerGroupPublicKey:</span> <input type="text" style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@myGameServerGroup.PublicKey"/></div>
+    <h3>Game servers (@myGameServerCount/@maxGameServerCount)</h3>
+
+    if (myGameServerCount < maxGameServerCount)
+    {
+        <div>
+            <form method="post" asp-page-handler="NewGameServer">
+                <span style="color: darkblue">New game server name:</span>
+                <input type="text" name="newGameServerName" style="width: 270px"/>
+                <input type="submit" value="Create new game server">
+            </form>
+        </div>
+    }
+
+    if (myValidGameServers != null && myValidGameServers.Count > 0)
+    {
+        foreach (GameServerModel gameServer in myValidGameServers)
+        {
+            <div style="color: blue; font-weight: bold; padding-top: 10px">Game server name: @gameServer.Name</div>
+            <div style="padding-left: 20px">
+                <div><span style="color: darkblue">gameServerPrivateKey:</span> <input type="text" style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServer.PrivateKey" /></div>
+                <div><span style="color: darkblue">gameServerPublicKey:</span> <input type="text" style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServer.PublicKey" /></div>
+                <div><span style="color: darkblue">Matches played: @(gameServer.Matches?.Count ?? 0)</span></div>
+                <div>
+                    <form method="post" asp-page-handler="DeleteGameServer" onsubmit="return confirm('Do you really want to delete game server and all its match data?');">
+                        <input type="hidden" name="deleteGameServerPrivateKey" value="@gameServer.PrivateKey" />
+                        <input type="submit" value="Delete game server">
+                    </form>
+                    <form method="post" asp-page-handler="ToggleGameServer">
+                        <input type="hidden" name="toggleGameServerPrivateKey" value="@gameServer.PrivateKey"/>
+                        <input type="submit" value="Toggle game server (current: @(gameServer.IsActive ? "enabled" : "disabled"))">
+                    </form>
+                </div>
+            </div>
+        }
+    }
 }
 else
 {
-    <div>NO SERVER GROUP</div>
+    <h3>NO SERVER GROUP</h3>
     <div>
-        <a asp-area="" asp-controller="Admin" asp-action="CreateGameServerGroup">Create my new game server group!</a>
+        <a asp-area="" asp-controller="Admin" asp-action="CreateGameServerGroup">Create my new game server group</a>
     </div>
 }

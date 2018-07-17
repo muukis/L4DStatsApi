@@ -20,9 +20,9 @@ namespace L4DStatsApi
             return await DbContext.GetUserGameServerGroup(this.User);
         }
 
-        public async Task<string> GetAuthenticatedUserEmailAddress()
+        public string GetAuthenticatedUserEmailAddress()
         {
-            return await DbContext.GetUserEmailAddress(this.User);
+            return DbContext.GetUserEmailAddress(this.User);
         }
     }
 }

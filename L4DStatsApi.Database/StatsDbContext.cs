@@ -80,21 +80,25 @@ namespace L4DStatsApi
 
         public async Task<GameServerGroupModel> GetUserGameServerGroup(ClaimsPrincipal user)
         {
-            if (!user.Identity.IsAuthenticated)
+            string emailAddress = GetUserEmailAddress(user);
+
+            if (emailAddress == null)
             {
                 return null;
             }
-
-            string emailAddress = user.Claims.Single(c => c.Type.EndsWith("emailaddress")).Value;
 
             return await GameServerGroup
                 .SingleOrDefaultAsync(gsg => gsg.EmailAddress.Equals(emailAddress));
         }
 
-        public async Task<string> GetUserEmailAddress(ClaimsPrincipal user)
+        public string GetUserEmailAddress(ClaimsPrincipal user)
         {
-            var gameServerGroup = await GetUserGameServerGroup(user);
-            return gameServerGroup?.EmailAddress;
+            if (!user.Identity.IsAuthenticated)
+            {
+                return null;
+            }
+
+            return user.Claims.Single(c => c.Type.EndsWith("emailaddress")).Value;
         }
 
     }

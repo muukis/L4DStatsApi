@@ -4,41 +4,29 @@
     ViewData["Title"] = "Frontpage";
 }
 
-    <h1 style="color:darkslateblue">Pilssi API - L4D Stats API</h1>
+<h1>Pilssi API - L4D Stats API</h1>
+<h2>Create your own game server keys by logging is using Facebook credentials.</h2>
+@{
+    var gameServerGroups = await @Model.GetGameServerGroups();
 
-    @{
-#if DEBUG
-        var gameServerGroupPrivateKey = Guid.Parse("66edfde5-54d6-4a4d-91b6-40209eb9414c");
-        var gameServerPrivateKey = Guid.Parse("4b12123c-896c-4e01-b966-a2cf57b63357");
+    <h3>Game server groups (gameServerGroupPublicKey) and games servers (gameServerPublicKey):</h3>
+    foreach (var gameServerGroup in gameServerGroups)
+    {
+        <div>@gameServerGroup.PublicKey</div>
 
-        <h2 style="color: darkblue">THIS API IS A DEVELOPMENT PLAYGROUND!</h2>
-        <div style="font-weight: bold">You can use these credentials for testing:</div>
-        <div><span style="color: darkblue">gameServerGroupPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerGroupPrivateKey" /></div>
-        <div><span style="color: darkblue">gameServerPrivateKey:</span> <input style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServerPrivateKey" /></div>
-        <br />
-        <div><a href="@Href("~/swagger")">Swagger is online</a></div>
-#endif
+        var gameServers = await @Model.GetGameServers(gameServerGroup.PublicKey);
 
-        var gameServerGroups = await @Model.GetGameServerGroups();
-
-        <h3 style="color: darkblue">Game server groups (gameServerGroupPublicKey) and games servers (gameServerPublicKey):</h3>
-        foreach (var gameServerGroup in gameServerGroups)
+        foreach (var gameServer in gameServers)
         {
-            <div>@gameServerGroup.PublicKey</div>
-
-            var gameServers = await @Model.GetGameServers(gameServerGroup.PublicKey);
-
-            foreach (var gameServer in gameServers)
-            {
-                <div style="padding-left: 20px"><span style="font-weight: bold">@gameServer.Name</span>: @gameServer.PublicKey</div>
-            }
-        }
-
-        var ongoingMatches = await @Model.GetOngoingMatches();
-
-        <h3 style="color: darkblue">Ongoing matches (matchId):</h3>
-        foreach (var ongoingMatche in ongoingMatches)
-        {
-            <div>@ongoingMatche.Id</div>
+            <div style="padding-left: 20px"><span style="font-weight: bold">@gameServer.Name</span>: @gameServer.PublicKey</div>
         }
     }
+
+    var ongoingMatches = await @Model.GetOngoingMatches();
+
+    <h3>Ongoing matches (matchId):</h3>
+    foreach (var ongoingMatche in ongoingMatches)
+    {
+        <div>@ongoingMatche.Id</div>
+    }
+}
