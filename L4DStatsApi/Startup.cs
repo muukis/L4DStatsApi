@@ -95,6 +95,7 @@ namespace L4DStatsApi
                 options.AddPolicy("GameServer",
                     policy =>
                     {
+                        policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
                         policy.RequireClaim("GameServerGroupIdentifier");
                         policy.RequireClaim("GameServerIdentifier");
                     });
