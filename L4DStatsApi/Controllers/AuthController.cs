@@ -9,24 +9,16 @@ namespace L4DStatsApi.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly IAuthenticationSchemeProvider authenticationSchemeProvider;
-
-        public AuthController(IAuthenticationSchemeProvider authenticationSchemeProvider)
+        public IActionResult SignIn()
         {
-            this.authenticationSchemeProvider = authenticationSchemeProvider;
-        }
+            string redirectUri = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
 
-        public async Task<IActionResult> Login()
-        {
-            var allSchemeProvider = (await authenticationSchemeProvider.GetAllSchemesAsync())
-                .Select(n => n.DisplayName).Where(n => !String.IsNullOrEmpty(n));
+            if (!redirectUri.EndsWith('/'))
+            {
+                redirectUri += '/';
+            }
 
-            return View(allSchemeProvider);
-        }
-
-        public IActionResult SignIn(String provider)
-        {
-            return Challenge(new AuthenticationProperties { RedirectUri = "/" }, provider);
+            return Challenge(new AuthenticationProperties { RedirectUri = redirectUri });
         }
 
         public async Task<IActionResult> SignOut()
