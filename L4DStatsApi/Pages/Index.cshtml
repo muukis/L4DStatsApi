@@ -5,8 +5,13 @@
 }
 
 <h1>Pilssi API - L4D Stats API</h1>
-<h2>Create your own game server keys by logging is using Facebook credentials.</h2>
+<div style="color: red; font-weight: bold">Create your own game server keys by logging is using Facebook credentials.</div>
 @{
+#if DEBUG
+    var swaggerUrl = @Href("~/swagger");
+    <div><a href="@swaggerUrl">Swagger is online</a></div>
+#endif
+
     var gameServerGroups = await @Model.GetGameServerGroups();
 
     <h3>Game server groups (gameServerGroupPublicKey) and games servers (gameServerPublicKey):</h3>
