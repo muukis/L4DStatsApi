@@ -219,6 +219,10 @@ public void RequestMapStart()
 	matchStartRequest.SetGameName(GameName);
 	matchStartRequest.SetMapName(CurrentMapName);
 	matchStartRequest.SetMatchType(CurrentGameMode);
+
+	decl String:json[2048];
+	matchStartRequest.ToString(json, sizeof(json));
+	PrintToServer("Plugin l4dstatsapi matchStartRequest=%s", json);
 	
 	CurrentMatchId = "";
 
