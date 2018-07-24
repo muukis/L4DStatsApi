@@ -18,15 +18,13 @@
 #define GAMEMODE_OTHERMUTATIONS 6
 #define GAMEMODES 7
 
-#define MAX_LINE_WIDTH 64
-
 new Handle:cvar_Gamemode = INVALID_HANDLE;
 new Handle:cvar_ApiBaseUrl = INVALID_HANDLE;
 new Handle:cvar_GameServerGroupPrivateKey = INVALID_HANDLE;
 new Handle:cvar_GameServerPrivateKey = INVALID_HANDLE;
 	
 HTTPClient httpClient;
-JSONArray playerStatsRequests = null;
+MatchStatsRequest currentMatchStats = null;
 
 new String:CurrentMatchId[MAX_LINE_WIDTH] = "";
 new PostAdminCheckRetryCounter[MAXPLAYERS + 1];
@@ -42,74 +40,24 @@ public Plugin:myinfo =
 	url = "http://www.sourcemod.com/"
 };
 
-new const String:Base64Table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-new const FillChar = '=';
-
-public int EncodeBase64(String:base64EncodedValue[], len, const String:value[]) {
-
-	int valueLength = strlen(value);
-	int resPos;
-
-	for (int pos = 0; pos < valueLength; pos++) {
-		new code = (value[pos] >> 2) & 0x3f;
-		resPos += FormatEx(base64EncodedValue[resPos], len - resPos, "%c", Base64Table[code]);
-		code = (value[pos] << 4) & 0x3f;
-
-		if(++pos < valueLength)
-		{
-			code |= (value[pos] >> 4) & 0x0f;
-		}
-
-		resPos += FormatEx(base64EncodedValue[resPos], len - resPos, "%c", Base64Table[code]);
-
-		if (pos < valueLength)
-		{
-			code = (value[pos] << 2) & 0x3f;
-
-			if(++pos < valueLength)
-			{
-				code |= (value[pos] >> 6) & 0x03;
-			}
-
-			resPos += FormatEx(base64EncodedValue[resPos], len - resPos, "%c", Base64Table[code]);
-		}
-		else
-		{
-			pos++;
-			resPos += FormatEx(base64EncodedValue[resPos], len - resPos, "%c", FillChar);
-		}
-
-		if(pos < valueLength)
-		{
-			code = value[pos] & 0x3f;
-			resPos += FormatEx(base64EncodedValue[resPos], len - resPos, "%c", Base64Table[code]);
-		}
-		else
-		{
-			resPos += FormatEx(base64EncodedValue[resPos], len - resPos, "%c", FillChar);
-		}
-	}
-
-	return resPos;
-}
-
 public void OnPluginStart()
 {
 	PrintToServer("Plugin l4dstatsapi OnPluginStart()");
 	// Plugin version public Cvar
-	CreateConVar("l4dstatsapi_version", PLUGIN_VERSION, "Custom Player Stats (API) Version", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
+	CreateConVar("l4dstatsapi_version", PLUGIN_VERSION, "Custom Player Stats (API) Version", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 
 	cvar_Gamemode = FindConVar("mp_gamemode");
 
-	cvar_ApiBaseUrl = CreateConVar("l4dstatsapi_apibaseurl", "https://pilssi.dy.fi:44033/l4dstatsapi/api", "Base URL for the API (example: https://pilssi.dy.fi:44033/l4dstatsapi/api)", FCVAR_PLUGIN);
-	cvar_GameServerGroupPrivateKey = CreateConVar("l4dstatsapi_gameservergroupprivatekey", "[YOUR GAME SERVER GROUP PRIVATE KEY HERE]", "Game server group private key (example: 66edfde5-54d6-4a4d-91b6-40209eb9414c)", FCVAR_PLUGIN);
-	cvar_GameServerPrivateKey = CreateConVar("l4dstatsapi_gameserverprivatekey", "[YOUR GAME SERVER PRIVATE KEY HERE]", "Game server private key (example: 4b12123c-896c-4e01-b966-a2cf57b63357)", FCVAR_PLUGIN);
+	cvar_ApiBaseUrl = CreateConVar("l4dstatsapi_apibaseurl", "https://pilssi.dy.fi:44033/l4dstatsapi/api", "Base URL for the API (example: https://pilssi.dy.fi:44033/l4dstatsapi/api)");
+	cvar_GameServerGroupPrivateKey = CreateConVar("l4dstatsapi_gameservergroupprivatekey", "[YOUR GAME SERVER GROUP PRIVATE KEY HERE]", "Game server group private key (example: 66edfde5-54d6-4a4d-91b6-40209eb9414c)");
+	cvar_GameServerPrivateKey = CreateConVar("l4dstatsapi_gameserverprivatekey", "[YOUR GAME SERVER PRIVATE KEY HERE]", "Game server private key (example: 4b12123c-896c-4e01-b966-a2cf57b63357)");
 
 	AutoExecConfig(true, "l4dstatsapi");
 
 	HookEvent("map_transition", event_MapTransition);
 	HookEvent("player_disconnect", event_PlayerDisconnect, EventHookMode_Pre);
 	HookEvent("player_death", event_PlayerDeath);
+	HookEvent("player_hurt", event_PlayerHurt);
 
 	RegAdminCmd("sm_l4dstatsapi_flush", cmd_FlushStats, ADMFLAG_GENERIC, "Flush current statistics");
 
@@ -124,11 +72,12 @@ public void OnPluginEnd()
 
 	PrintToServer("Plugin l4dstatsapi OnPluginEnd() - delete httpClient");
 	delete httpClient;
-	delete playerStatsRequests;
+	delete currentMatchStats;
 
 	UnhookEvent("map_transition", event_MapTransition);
 	UnhookEvent("player_disconnect", event_PlayerDisconnect, EventHookMode_Pre);
 	UnhookEvent("player_death", event_PlayerDeath);
+	UnhookEvent("player_hurt", event_PlayerHurt);
 }
 
 public Action:cmd_FlushStats(client, args)
@@ -162,7 +111,9 @@ public void InitializeVariables()
 	httpClient.Post("Identity", identityRequest, OnIdentityReceived);
 	
 	delete identityRequest;
-	delete playerStatsRequests;
+
+	delete currentMatchStats;
+	currentMatchStats = null;
 }
 
 public OnConfigsExecuted()
@@ -248,8 +199,9 @@ public void OnMatchStartReceived(HTTPResponse response, any value)
 	matchStartResponse.GetMatchId(CurrentMatchId, sizeof(CurrentMatchId));
 	PrintToServer("Plugin l4dstatsapi CurrentMatchId=%s", CurrentMatchId);
 
-	delete playerStatsRequests;
-	playerStatsRequests = new JSONArray();
+	delete currentMatchStats;
+	currentMatchStats = new MatchStatsRequest();
+	currentMatchStats.SetMatchId(CurrentMatchId);
 
 	for (int i = 1; i < MaxClients; i++)
 	{
@@ -260,7 +212,7 @@ public void OnMatchStartReceived(HTTPResponse response, any value)
 			continue;
 		}
 		
-		PlayerStatsRequest playerStatsRequest = GetPlayerStatsRequest(i, steamId);
+		PlayerStatsRequest playerStatsRequest = currentMatchStats.GetPlayerStats(i, steamId);
 		delete playerStatsRequest;
 	}
 
@@ -282,7 +234,7 @@ public OnMapEnd()
 public void RequestMapEnd()
 {
 	PrintToServer("Plugin l4dstatsapi RequestMapEnd()");
-	if (strlen(CurrentMatchId) == 0)
+	if (currentMatchStats == null)
 	{
 		return;
 	}
@@ -377,7 +329,7 @@ public Action:ClientPostAdminCheck(Handle:timer, any:client)
 	decl String:SteamID[MAX_LINE_WIDTH];
 	GetClientSteamId(client, SteamID, sizeof(SteamID));
 
-	PlayerStatsRequest playerStatsRequest = GetPlayerStatsRequest(client, SteamID);
+	PlayerStatsRequest playerStatsRequest = currentMatchStats.GetPlayerStats(client, SteamID);
 	delete playerStatsRequest;
 }
 
@@ -397,9 +349,7 @@ public void OnMatchStatsReceived(HTTPResponse response, any value)
 	}
 
 	PrintToServer("Plugin l4dstatsapi OnMatchStatsReceived() - Clearing");
-	playerStatsRequests.Clear();
-	delete playerStatsRequests;
-	playerStatsRequests = new JSONArray();
+	currentMatchStats.Players.Clear();
 }
 
 public void SendSinglePlayerStatsRequest(PlayerStatsRequest:playerStatsRequest)
@@ -428,96 +378,34 @@ public void SendSinglePlayerStatsRequest(PlayerStatsRequest:playerStatsRequest)
 public void FlushPlayerStatsRequests()
 {
 	PrintToServer("Plugin l4dstatsapi FlushPlayerStatsRequests()");
-	if (playerStatsRequests == null || playerStatsRequests.Length == 0)
+	if (currentMatchStats == null || currentMatchStats.Players == null || currentMatchStats.Players.Length == 0)
 	{
 		return;
 	}
 
-	MatchStatsRequest matchStatsRequest = new MatchStatsRequest();
-	matchStatsRequest.SetMatchId(CurrentMatchId);
-	matchStatsRequest.Players = playerStatsRequests;
-
 	decl String:json[2048];
-	matchStatsRequest.ToString(json, sizeof(json));
-	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest() - matchStatsRequest=%s", json);
+	currentMatchStats.ToString(json, sizeof(json));
+	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest() - currentMatchStats=%s", json);
 
-	httpClient.Post("Stats/match", matchStatsRequest, OnMatchStatsReceived, true);
-
-	delete matchStatsRequest;
+	//httpClient.Post("Stats/match", currentMatchStats, OnMatchStatsReceived, true);
 }
 
 public void SendPlayerStatsRequestsAndEndMatchRequest()
 {
 	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest()");
-	if (playerStatsRequests == null || playerStatsRequests.Length == 0)
+	if (currentMatchStats == null || currentMatchStats.Players == null || currentMatchStats.Players.Length == 0)
 	{
 		RequestMapEnd();
 		return;
 	}
 	
-	MatchStatsRequest matchStatsRequest = new MatchStatsRequest();
-	matchStatsRequest.SetMatchId(CurrentMatchId);
-	matchStatsRequest.Players = playerStatsRequests;
-
 	decl String:json[2048];
-	matchStatsRequest.ToString(json, sizeof(json));
-	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest() - matchStatsRequest=%s", json);
+	currentMatchStats.ToString(json, sizeof(json));
+	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest() - currentMatchStats=%s", json);
 
-	httpClient.Post("Stats/match", matchStatsRequest, OnMatchStatsReceived, true);
-
-	delete matchStatsRequest;
+	//httpClient.Post("Stats/match", currentMatchStats, OnMatchStatsReceived, true);
 
 	RequestMapEnd();
-}
-
-public PlayerStatsRequest:CreatePlayerStatsRequest(client, const String:SteamId[])
-{
-	PrintToServer("Plugin l4dstatsapi CreatePlayerStatsRequest()");
-	decl String:playerName[MAX_LINE_WIDTH];
-	GetClientName(client, playerName, sizeof(playerName));
-	PrintToServer("Plugin l4dstatsapi CreatePlayerStatsRequest() - SteamId=%s | PlayerName=%s", SteamId, playerName);
-
-	decl String:encodedPlayerName[2*MAX_LINE_WIDTH];
-	EncodeBase64(encodedPlayerName, sizeof(encodedPlayerName), playerName);
-
-	PlayerStatsRequest playerStatsRequest = new PlayerStatsRequest();
-	playerStatsRequest.SetSteamId(SteamId);
-	playerStatsRequest.SetBase64EncodedName(encodedPlayerName);
-	playerStatsRequest.Kills = 0;
-	playerStatsRequest.Deaths = 0;
-
-	return playerStatsRequest;
-}
-
-public PlayerStatsRequest:GetPlayerStatsRequest(client, const String:SteamId[])
-{
-	if (playerStatsRequests == null)
-	{
-		return null;
-	}
-
-	PlayerStatsRequest playerStatsRequest;
-	decl String:tempSteamId[MAX_LINE_WIDTH];
-
-	for (int i = 0; i < playerStatsRequests.Length; i++)
-	{
-		playerStatsRequest = view_as<PlayerStatsRequest>(playerStatsRequests.Get(i));
-		playerStatsRequest.GetSteamId(tempSteamId, sizeof(tempSteamId));
-
-		if (StrEqual(SteamId, tempSteamId, false))
-		{
-			return playerStatsRequest;
-		}
-		
-		delete playerStatsRequest;
-	}
-
-	playerStatsRequest = CreatePlayerStatsRequest(client, SteamId);
-	playerStatsRequests.Push(playerStatsRequest);
-
-	SendSinglePlayerStatsRequest(playerStatsRequest);
-
-	return playerStatsRequest;
 }
 
 public Action:event_PlayerDisconnect(Handle:event, const String:event_name[], bool:dontBroadcast)
@@ -551,7 +439,7 @@ public Action:event_PlayerDisconnect(Handle:event, const String:event_name[], bo
 
 public Action:event_PlayerDeath(Handle:event, const String:name[], bool:dontBroadcast)
 {
-	if (playerStatsRequests == null)
+	if (currentMatchStats == null)
 	{
 		return;
 	}
@@ -564,26 +452,34 @@ public Action:event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	decl String:victimSteamId[MAX_LINE_WIDTH];
 	bool victimIsBot = IsClientBotWithSteamId(victim, victimSteamId, sizeof(victimSteamId));
 
+	// Both attacker and victim are bots -> NVM
 	if (attackerIsBot && victimIsBot)
 	{
 		return;
 	}
 
+	char weapon[MAX_LINE_WIDTH];
+	GetEventString(event, "weapon", weapon, sizeof(weapon));
+
+	bool isHeadshotKill = GetEventBool(event, "headshot");
+	
 	if (!attackerIsBot)
 	{
-		GetClientSteamId(attacker, attackerSteamId, sizeof(attackerSteamId));
-		PlayerStatsRequest attackerStatsRequest = GetPlayerStatsRequest(attacker, attackerSteamId);
-		attackerStatsRequest.Kills++;
-		delete attackerStatsRequest;
+		PlayerStatsRequest attackerStats = currentMatchStats.GetPlayerStats(attacker, attackerSteamId);
+		attackerStats.AddWeaponKillTarget(weapon, victimSteamId, isHeadshotKill);
+		delete attackerStats;
 	}
 
 	if (!victimIsBot)
 	{
-		GetClientSteamId(victim, victimSteamId, sizeof(victimSteamId));
-		PlayerStatsRequest victimStatsRequest = GetPlayerStatsRequest(victim, victimSteamId);
-		victimStatsRequest.Deaths++;
-		delete victimStatsRequest;
+		PlayerStatsRequest victimStats = currentMatchStats.GetPlayerStats(victim, victimSteamId);
+		victimStats.AddWeaponDeathTarget(weapon, attackerSteamId, isHeadshotKill);
+		delete victimStats;
 	}
+}
+
+public Action:event_PlayerHurt(Handle:event, const String:name[], bool:dontBroadcast)
+{
 }
 
 public int GetPlayersOnlineCount()
