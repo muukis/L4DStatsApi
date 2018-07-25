@@ -212,8 +212,9 @@ public void OnMatchStartReceived(HTTPResponse response, any value)
 			continue;
 		}
 		
-		PlayerStatsRequest playerStatsRequest = currentMatchStats.GetPlayerStats(i, steamId);
-		delete playerStatsRequest;
+		PlayerStatsRequest playerStats = currentMatchStats.GetPlayerStats(i, steamId);
+		SendSinglePlayerStats(playerStats);
+		delete playerStats;
 	}
 
 	PrintToServer("Plugin l4dstatsapi OnMatchStartReceived()");
@@ -284,10 +285,12 @@ public bool:IsClientBotWithSteamId(client, String:steamId[], maxlength)
 {
 	if (client == 0 || !IsClientConnected(client) || IsFakeClient(client))
 	{
+		FormatEx(steamId, maxlength, "BOT");
 		return true;
 	}
 
 	GetClientSteamId(client, steamId, maxlength);
+	PrintToServer("IsClientBotWithSteamId - %s", steamId);
 
 	if (StrEqual(steamId, "BOT", false))
 	{
@@ -300,11 +303,6 @@ public bool:IsClientBotWithSteamId(client, String:steamId[], maxlength)
 public void GetClientSteamId(client, String:steamId[], maxlength)
 {
 	GetClientAuthId(client, AuthId_Steam2, steamId, maxlength);
-
-	if (StrEqual(steamId, "STEAM_ID_LAN", false))
-	{
-		GetClientIP(client, steamId, maxlength);
-	}
 }
 
 public Action:ClientPostAdminCheck(Handle:timer, any:client)
@@ -330,6 +328,7 @@ public Action:ClientPostAdminCheck(Handle:timer, any:client)
 	GetClientSteamId(client, SteamID, sizeof(SteamID));
 
 	PlayerStatsRequest playerStatsRequest = currentMatchStats.GetPlayerStats(client, SteamID);
+	SendSinglePlayerStats(playerStatsRequest);
 	delete playerStatsRequest;
 }
 
@@ -352,9 +351,9 @@ public void OnMatchStatsReceived(HTTPResponse response, any value)
 	currentMatchStats.Players.Clear();
 }
 
-public void SendSinglePlayerStatsRequest(PlayerStatsRequest:playerStatsRequest)
+public void SendSinglePlayerStats(PlayerStatsRequest:playerStatsRequest)
 {
-	PrintToServer("Plugin l4dstatsapi SendSinglePlayerStatsRequest()");
+	PrintToServer("Plugin l4dstatsapi SendSinglePlayerStats()");
 	JSONArray players = new JSONArray();
 	players.Push(view_as<PlayerStatsRequest>(playerStatsRequest));
 
@@ -367,7 +366,7 @@ public void SendSinglePlayerStatsRequest(PlayerStatsRequest:playerStatsRequest)
 
 	decl String:json[2048];
 	matchStatsRequest.ToString(json, sizeof(json));
-	PrintToServer("Plugin l4dstatsapi SendSinglePlayerStatsRequest() - encodedPlayerName=%s | matchStatsRequest=%s", encodedPlayerName, json);
+	PrintToServer("Plugin l4dstatsapi SendSinglePlayerStats() - encodedPlayerName=%s | matchStatsRequest=%s", encodedPlayerName, json);
 
 	httpClient.Post("Stats/match", matchStatsRequest, OnMatchStatsReceived);
 	
@@ -457,7 +456,8 @@ public Action:event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	{
 		return;
 	}
-
+	PrintToServer("attackerSteamId=%s", attackerSteamId);
+	PrintToServer("victimSteamId=%s", victimSteamId);
 	char weapon[MAX_LINE_WIDTH];
 	GetEventString(event, "weapon", weapon, sizeof(weapon));
 

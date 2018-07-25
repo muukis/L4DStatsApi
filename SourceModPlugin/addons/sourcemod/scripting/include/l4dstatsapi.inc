@@ -119,7 +119,13 @@ methodmap MatchEndRequest < JSONObject
 methodmap WeaponRequest < JSONObject
 {
 	// Constructor
-	public WeaponRequest() { return view_as<WeaponRequest>(new JSONObject()); }
+	public WeaponRequest()
+	{
+		WeaponRequest newWeapon = view_as<WeaponRequest>(new JSONObject());
+		newWeapon.Set("KillTargets", new JSONArray());
+		newWeapon.Set("DeathTargets", new JSONArray());
+		return newWeapon;
+	}
 
 	public void GetName(char[] buffer, int maxlength)
 	{
@@ -175,7 +181,12 @@ methodmap WeaponTargetRequest < JSONObject
 methodmap PlayerStatsRequest < JSONObject
 {
 	// Constructor
-	public PlayerStatsRequest() { return view_as<PlayerStatsRequest>(new JSONObject()); }
+	public PlayerStatsRequest()
+	{
+		PlayerStatsRequest newPlayerStats = view_as<PlayerStatsRequest>(new JSONObject());
+		newPlayerStats.Set("Weapons", new JSONArray());
+		return newPlayerStats;
+	}
 
 	public void GetSteamId(char[] buffer, int maxlength)
 	{
@@ -205,11 +216,6 @@ methodmap PlayerStatsRequest < JSONObject
 	
 	public WeaponRequest GetWeapon(const char[] weaponName)
 	{
-		if (this.Weapons == null)
-		{
-			this.Weapons = new JSONArray();
-		}
-
 		WeaponRequest weapon;
 		char tempWeaponName[MAX_LINE_WIDTH];
 
@@ -236,6 +242,7 @@ methodmap PlayerStatsRequest < JSONObject
 	
 	public void AddWeaponTarget(JSONArray weaponTargetArray, const char[] targetSteamId, bool isHeadshot)
 	{
+		PrintToServer("KUKKUU1");
 		WeaponTargetRequest weaponTarget;
 		char tempTargetSteamId[MAX_LINE_WIDTH];
 
@@ -262,9 +269,11 @@ methodmap PlayerStatsRequest < JSONObject
 			weaponTarget = null;
 		}
 		
+		PrintToServer("KUKKUU2");
 		weaponTarget = new WeaponTargetRequest();
 		weaponTarget.SetSteamId(targetSteamId);
 		weaponTarget.Counter = 1;
+		PrintToServer("KUKKUU3");
 
 		if (isHeadshot)
 		{
@@ -307,7 +316,12 @@ methodmap PlayerStatsRequest < JSONObject
 methodmap MatchStatsRequest < JSONObject
 {
 	// Constructor
-	public MatchStatsRequest() { return view_as<MatchStatsRequest>(new JSONObject()); }
+	public MatchStatsRequest()
+	{
+		MatchStatsRequest newMatchStats = view_as<MatchStatsRequest>(new JSONObject());
+		newMatchStats.Set("Players", new JSONArray());
+		return newMatchStats;
+	}
 	
 	public void GetMatchId(char[] buffer, int maxlength)
 	{
@@ -394,11 +408,6 @@ methodmap MatchStatsRequest < JSONObject
 
 	public PlayerStatsRequest GetPlayerStats(int client, const char[] steamId)
 	{
-		if (this.Players == null)
-		{
-			this.Players = new JSONArray();
-		}
-
 		PlayerStatsRequest playerStats;
 		char tempSteamId[MAX_LINE_WIDTH];
 
