@@ -152,13 +152,13 @@ namespace L4DStatsApi.Services
         private async Task<List<UpdatedMatchPlayer>> GetMatchPlayersToUpdate(MatchStatsBody matchStats)
         {
             // Find existing match players
-            var updatedMatchPlayers =
+            var updatedMatchPlayers = 
                 await (from mp in this.dbContext.MatchPlayer
                         join ps in matchStats.Players
                             on mp.SteamId equals ps.SteamId
                         where mp.MatchId == matchStats.MatchId
                         select new UpdatedMatchPlayer { Model = mp, Body = ps})
-                    .Include(ump => ump.Model.Weapons).ToListAsync();
+                    .ToListAsync();
 
             // Find new match players (non existing)
             var newMatchPlayers = matchStats.Players

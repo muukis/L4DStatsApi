@@ -98,4 +98,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="HeadshotCount" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a1b8a55a-3387-49ad-a71d-be5f6d66d5d4" ChangeDateTime="07/25/2018 15:59:45">
+    <Property Name="ElementName" Value="[dbo].[GameServerGroup].[OwnerEmail]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[GameServerGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="OwnerEmailHash" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c9db9dd9-1861-46d0-b7db-6ae71e99f85e" ChangeDateTime="07/25/2018 16:00:15">
+    <Property Name="ElementName" Value="[dbo].[GameServerGroup].[OwnerEmailHash]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[GameServerGroup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="EmailAddress" />
+  </Operation>
 </Operations>
