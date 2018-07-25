@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace L4DStatsApi.Models
 {
@@ -9,7 +10,6 @@ namespace L4DStatsApi.Models
         public virtual MatchModel Match { get; set; }
         public string SteamId { get; set; }
         public string Name { get; set; }
-        public int Kills { get; set; }
-        public int Deaths { get; set; }
+        public virtual List<WeaponModel> Weapons { get; set; }
     }
 }

@@ -9,8 +9,6 @@ namespace L4DStatsApi.Requests
         [Required]
         public string Base64EncodedName { get; set; }
         [Required]
-        public int Kills { get; set; }
-        [Required]
-        public int Deaths { get; set; }
+        public WeaponBody[] Weapons { get; set; }
     }
 }

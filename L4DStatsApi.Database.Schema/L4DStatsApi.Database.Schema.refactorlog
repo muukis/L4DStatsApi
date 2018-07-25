@@ -77,4 +77,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="PrivateKey" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7434b265-c3a0-4250-b539-1004f89b0060" ChangeDateTime="07/25/2018 06:41:23">
+    <Property Name="ElementName" Value="[dbo].[MatchPlayerWeapon].[MatchId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[MatchPlayerWeapon]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="MatchPlayerId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="158bf44e-61d4-4a46-ab2a-9ae2a783a0fe" ChangeDateTime="07/25/2018 07:28:42">
+    <Property Name="ElementName" Value="[dbo].[WeaponTarget].[Counter]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[WeaponTarget]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Count" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f0c65cec-c3be-41c3-a5b5-2e8049e11dff" ChangeDateTime="07/25/2018 07:28:47">
+    <Property Name="ElementName" Value="[dbo].[WeaponTarget].[HeadshotCounter]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[WeaponTarget]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="HeadshotCount" />
+  </Operation>
 </Operations>

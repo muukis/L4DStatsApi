@@ -73,8 +73,23 @@ namespace L4DStatsApi.Services
             foreach (var ump in updatedMatchPlayers)
             {
                 var updatedPlayerStats = matchStats.Players.Single(ps => ump.SteamId == ps.SteamId);
-                ump.Kills += updatedPlayerStats.Kills;
-                ump.Deaths += updatedPlayerStats.Deaths;
+                var updatedWeapons =
+                    updatedPlayerStats.Weapons.Join(ump.Weapons, w => w.Name, w => w.Name,
+                        (wOuter, wInner) => wOuter);
+
+                foreach (var uw in updatedWeapons)
+                {
+                    var updatedWeaponTargets = 
+                        ump.Weapons.Single(w => w.Name == uw.Name)
+                            .WeaponTargets.Join(uw.Targets, wt => wt.Type, wt => wt.Type.ToString(), 
+                                (wtOuter, wtInner) => wtInner);
+                }
+
+                var newWeapons = updatedPlayerStats.Weapons.Except(updatedWeapons);
+
+                if (updatedPlayerStats.Weapons == null) return;
+                //ump.Kills += updatedPlayerStats.Kills;
+                //ump.Deaths += updatedPlayerStats.Deaths;
             }
 
             var newMatchPlayers = matchStats.Players.Where(ps =>
@@ -84,8 +99,8 @@ namespace L4DStatsApi.Services
                     MatchId = matchStats.MatchId,
                     SteamId = ps.SteamId,
                     Name = ps.GetBase64DecodedName(),
-                    Kills = ps.Kills,
-                    Deaths = ps.Deaths
+                    //Kills = ps.Kills,
+                    //Deaths = ps.Deaths
                 }).ToList();
 
             if (newMatchPlayers.Count > 0)
