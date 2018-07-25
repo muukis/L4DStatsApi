@@ -290,7 +290,6 @@ public bool:IsClientBotWithSteamId(client, String:steamId[], maxlength)
 	}
 
 	GetClientSteamId(client, steamId, maxlength);
-	PrintToServer("IsClientBotWithSteamId - %s", steamId);
 
 	if (StrEqual(steamId, "BOT", false))
 	{
@@ -334,7 +333,7 @@ public Action:ClientPostAdminCheck(Handle:timer, any:client)
 
 public void OnMatchStatsReceived(HTTPResponse response, any value)
 {
-	PrintToServer("Plugin l4dstatsapi OnMatchStatsReceived() KUKKUU");
+	PrintToServer("Plugin l4dstatsapi OnMatchStatsReceived()");
 	if (response.Status != HTTPStatus_OK) {
 		// Failed to retrieve identity
 		PrintToServer("Plugin l4dstatsapi OnMatchStatsReceived() - Status: %d", response.Status);
@@ -386,7 +385,7 @@ public void FlushPlayerStatsRequests()
 	currentMatchStats.ToString(json, sizeof(json));
 	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest() - currentMatchStats=%s", json);
 
-	//httpClient.Post("Stats/match", currentMatchStats, OnMatchStatsReceived, true);
+	httpClient.Post("Stats/match", currentMatchStats, OnMatchStatsReceived, true);
 }
 
 public void SendPlayerStatsRequestsAndEndMatchRequest()
@@ -398,11 +397,11 @@ public void SendPlayerStatsRequestsAndEndMatchRequest()
 		return;
 	}
 	
-	decl String:json[2048];
+	decl String:json[8192];
 	currentMatchStats.ToString(json, sizeof(json));
 	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest() - currentMatchStats=%s", json);
 
-	//httpClient.Post("Stats/match", currentMatchStats, OnMatchStatsReceived, true);
+	httpClient.Post("Stats/match", currentMatchStats, OnMatchStatsReceived, true);
 
 	RequestMapEnd();
 }
@@ -456,8 +455,7 @@ public Action:event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	{
 		return;
 	}
-	PrintToServer("attackerSteamId=%s", attackerSteamId);
-	PrintToServer("victimSteamId=%s", victimSteamId);
+
 	char weapon[MAX_LINE_WIDTH];
 	GetEventString(event, "weapon", weapon, sizeof(weapon));
 
@@ -466,14 +464,14 @@ public Action:event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	if (!attackerIsBot)
 	{
 		PlayerStatsRequest attackerStats = currentMatchStats.GetPlayerStats(attacker, attackerSteamId);
-		attackerStats.AddWeaponKillTarget(weapon, victimSteamId, isHeadshotKill);
+		attackerStats.AddWeaponTarget(weapon, victimSteamId, "Kill", isHeadshotKill);
 		delete attackerStats;
 	}
 
 	if (!victimIsBot)
 	{
 		PlayerStatsRequest victimStats = currentMatchStats.GetPlayerStats(victim, victimSteamId);
-		victimStats.AddWeaponDeathTarget(weapon, attackerSteamId, isHeadshotKill);
+		victimStats.AddWeaponTarget(weapon, attackerSteamId, "Death", isHeadshotKill);
 		delete victimStats;
 	}
 }

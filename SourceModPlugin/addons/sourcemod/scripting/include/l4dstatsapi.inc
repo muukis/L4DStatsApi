@@ -122,8 +122,7 @@ methodmap WeaponRequest < JSONObject
 	public WeaponRequest()
 	{
 		WeaponRequest newWeapon = view_as<WeaponRequest>(new JSONObject());
-		newWeapon.Set("KillTargets", new JSONArray());
-		newWeapon.Set("DeathTargets", new JSONArray());
+		newWeapon.Set("Targets", new JSONArray());
 		return newWeapon;
 	}
 
@@ -137,16 +136,10 @@ methodmap WeaponRequest < JSONObject
 		this.SetString("Name", value);
 	}
 
-	property JSONArray KillTargets
+	property JSONArray Targets
 	{
-		public get() { return view_as<JSONArray>(this.Get("KillTargets")); }
-		public set(JSONArray value) { this.Set("KillTargets", value); }
-	}
-
-	property JSONArray DeathTargets
-	{
-		public get() { return view_as<JSONArray>(this.Get("DeathTargets")); }
-		public set(JSONArray value) { this.Set("DeathTargets", value); }
+		public get() { return view_as<JSONArray>(this.Get("Targets")); }
+		public set(JSONArray value) { this.Set("Targets", value); }
 	}
 };
 
@@ -164,17 +157,27 @@ methodmap WeaponTargetRequest < JSONObject
 	{
 		this.SetString("SteamId", value);
 	}
-	
-	property int Counter
+
+	public void GetType(char[] buffer, int maxlength)
 	{
-		public get() { return this.GetInt("Counter"); }
-		public set(int value) { this.SetInt("Counter", value); }
+		this.GetString("Type", buffer, maxlength);
 	}
 	
-	property int HeadshotCounter
+	public void SetType(const char[] value)
 	{
-		public get() { return this.GetInt("HeadshotCounter"); }
-		public set(int value) { this.SetInt("HeadshotCounter", value); }
+		this.SetString("Type", value);
+	}
+	
+	property int Count
+	{
+		public get() { return this.GetInt("Count"); }
+		public set(int value) { this.SetInt("Count", value); }
+	}
+	
+	property int HeadshotCount
+	{
+		public get() { return this.GetInt("HeadshotCount"); }
+		public set(int value) { this.SetInt("HeadshotCount", value); }
 	}
 };
 
@@ -240,24 +243,27 @@ methodmap PlayerStatsRequest < JSONObject
 		return weapon;
 	}
 	
-	public void AddWeaponTarget(JSONArray weaponTargetArray, const char[] targetSteamId, bool isHeadshot)
+	public void AddWeaponTarget(const char[] weaponName, const char[] targetSteamId, const char[] type, bool isHeadshot)
 	{
-		PrintToServer("KUKKUU1");
+		WeaponRequest weapon = this.GetWeapon(weaponName);
+
 		WeaponTargetRequest weaponTarget;
 		char tempTargetSteamId[MAX_LINE_WIDTH];
+		char tempType[MAX_LINE_WIDTH];
 
-		for (int i = 0; i < weaponTargetArray.Length; i++)
+		for (int i = 0; i < weapon.Targets.Length; i++)
 		{
-			weaponTarget = view_as<WeaponTargetRequest>(weaponTargetArray.Get(i));
+			weaponTarget = view_as<WeaponTargetRequest>(weapon.Targets.Get(i));
 			weaponTarget.GetSteamId(tempTargetSteamId, sizeof(tempTargetSteamId));
+			weaponTarget.GetType(tempType, sizeof(tempType));
 
-			if (StrEqual(targetSteamId, tempTargetSteamId, false))
+			if (StrEqual(targetSteamId, tempTargetSteamId, false) && StrEqual(type, tempType, false))
 			{
-				weaponTarget.Counter++;
+				weaponTarget.Count++;
 
 				if (isHeadshot)
 				{
-					weaponTarget.HeadshotCounter++;
+					weaponTarget.HeadshotCount++;
 				}
 
 				delete weaponTarget;
@@ -269,47 +275,24 @@ methodmap PlayerStatsRequest < JSONObject
 			weaponTarget = null;
 		}
 		
-		PrintToServer("KUKKUU2");
 		weaponTarget = new WeaponTargetRequest();
 		weaponTarget.SetSteamId(targetSteamId);
-		weaponTarget.Counter = 1;
-		PrintToServer("KUKKUU3");
+		weaponTarget.SetType(type);
+		weaponTarget.Count = 1;
 
 		if (isHeadshot)
 		{
-			weaponTarget.HeadshotCounter = 1;
+			weaponTarget.HeadshotCount = 1;
 		}
 		else
 		{
-			weaponTarget.HeadshotCounter = 0;
+			weaponTarget.HeadshotCount = 0;
 		}
 
-		weaponTargetArray.Push(weaponTarget);
+		weapon.Targets.Push(weaponTarget);
+
 		delete weaponTarget;
-	}
-	
-	public void AddWeaponKillTarget(const char[] weaponName, const char[] targetSteamId, bool isHeadshot)
-	{
-		WeaponRequest weapon = this.GetWeapon(weaponName);
-
-		if (weapon.KillTargets == null)
-		{
-			weapon.KillTargets = new JSONArray();
-		}
-
-		this.AddWeaponTarget(weapon.KillTargets, targetSteamId, isHeadshot);
-	}
-	
-	public void AddWeaponDeathTarget(const char[] weaponName, const char[] targetSteamId, bool isHeadshot)
-	{
-		WeaponRequest weapon = this.GetWeapon(weaponName);
-
-		if (weapon.DeathTargets == null)
-		{
-			weapon.DeathTargets = new JSONArray();
-		}
-
-		this.AddWeaponTarget(weapon.DeathTargets, targetSteamId, isHeadshot);
+		delete weapon;
 	}
 };
 
