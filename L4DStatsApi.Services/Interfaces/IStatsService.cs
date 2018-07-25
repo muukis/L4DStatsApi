@@ -12,7 +12,7 @@ namespace L4DStatsApi.Interfaces
     public interface IStatsService
     {
         Task<MatchStartedResult> StartMatch(GameServerIdentityContainer apiUserIdentity, MatchStartBody matchStart);
-        Task SaveMatchStats(GameServerIdentityContainer apiUserIdentity, MatchStatsBody matchStats);
+        Task AppendMatchStats(GameServerIdentityContainer apiUserIdentity, MatchStatsBody matchStats);
         Task EndMatch(GameServerIdentityContainer apiUserIdentity, MatchEndBody matchEnd);
         Task<PlayerStatsResult> GetPlayerStats(string steamId, Func<MatchPlayerModel, bool> additionalValidation = null);
         Task<MultiplePlayerStatsResult> GetPlayers(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null);

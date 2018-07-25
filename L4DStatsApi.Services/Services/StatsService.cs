@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using L4DStatsApi.Helpers.Database;
@@ -53,7 +54,7 @@ namespace L4DStatsApi.Services
             };
         }
 
-        public async Task SaveMatchStats(GameServerIdentityContainer apiUserIdentity, MatchStatsBody matchStats)
+        public async Task AppendMatchStats(GameServerIdentityContainer apiUserIdentity, MatchStatsBody matchStats)
         {
             await this.dbContext.ValidateGameServerIdentity(apiUserIdentity);
             await this.dbContext.ValidateMatchNotEnded(matchStats.MatchId);
@@ -63,52 +64,165 @@ namespace L4DStatsApi.Services
                 return;
             }
 
-            var updatedMatchPlayers =
-                await (from mp in this.dbContext.MatchPlayer
-                    join ps in matchStats.Players
-                        on mp.SteamId equals ps.SteamId
-                    where mp.MatchId == matchStats.MatchId
-                    select mp).ToListAsync();
-
-            foreach (var ump in updatedMatchPlayers)
+            try
             {
-                var updatedPlayerStats = matchStats.Players.Single(ps => ump.SteamId == ps.SteamId);
-                var updatedWeapons =
-                    updatedPlayerStats.Weapons.Join(ump.Weapons, w => w.Name, w => w.Name,
-                        (wOuter, wInner) => wOuter);
-
-                foreach (var uw in updatedWeapons)
+                using (var dbTransaction = await this.dbContext.Database.BeginTransactionAsync())
                 {
-                    var updatedWeaponTargets = 
-                        ump.Weapons.Single(w => w.Name == uw.Name)
-                            .WeaponTargets.Join(uw.Targets, wt => wt.Type, wt => wt.Type.ToString(), 
-                                (wtOuter, wtInner) => wtInner);
+                    var updatedMatchPlayers = await GetMatchPlayersToUpdate(matchStats);
+
+                    foreach (var updatedMatchPlayer in updatedMatchPlayers)
+                    {
+                        await AppendMatchPlayerWeaponTargets(updatedMatchPlayer);
+                    }
+
+                    await this.dbContext.SaveChangesAsync();
+                    dbTransaction.Commit();
                 }
+            }
+            catch (Exception e)
+            {
+                throw new DataException("Failed appending match statistics.");
+            }
+        }
 
-                var newWeapons = updatedPlayerStats.Weapons.Except(updatedWeapons);
+        private async Task AppendMatchPlayerWeaponTargets(UpdatedMatchPlayer updatedMatchPlayer)
+        {
+            var updatedWeapons = await GetWeaponsToUpdate(updatedMatchPlayer);
 
-                if (updatedPlayerStats.Weapons == null) return;
-                //ump.Kills += updatedPlayerStats.Kills;
-                //ump.Deaths += updatedPlayerStats.Deaths;
+            foreach (var updatedWeapon in updatedWeapons)
+            {
+                await AppendWeaponTargets(updatedWeapon);
             }
 
-            var newMatchPlayers = matchStats.Players.Where(ps =>
-                updatedMatchPlayers.All(ump => ump.SteamId != ps.SteamId))
-                .Select(ps => new MatchPlayerModel
+            var newWeapons = (updatedWeapons == null
+                    ? updatedMatchPlayer.Body?.Weapons
+                    : updatedMatchPlayer.Body?.Weapons?.Except(updatedWeapons.Select(uw => uw.Body)))
+                ?.ToList();
+
+            if (newWeapons != null && newWeapons.Any())
+            {
+                var newWeaponModels = newWeapons.Select(w => new WeaponModel
                 {
-                    MatchId = matchStats.MatchId,
-                    SteamId = ps.SteamId,
-                    Name = ps.GetBase64DecodedName(),
-                    //Kills = ps.Kills,
-                    //Deaths = ps.Deaths
+                    MatchPlayerId = updatedMatchPlayer.Model.Id,
+                    Name = w.Name
+                });
+
+                await this.dbContext.Weapon.AddRangeAsync(newWeaponModels);
+            }
+        }
+
+        private async Task<List<UpdatedWeapon>> GetWeaponsToUpdate(UpdatedMatchPlayer updatedMatchPlayer)
+        {
+            // Find existing weapons
+            var updatedWeapons = updatedMatchPlayer.Model.Weapons?.Join(
+                updatedMatchPlayer.Body.Weapons,
+                w => w.Name,
+                w => w.Name,
+                (wm, wb) => new UpdatedWeapon {Model = wm, Body = wb}).ToList()
+                ?? new List<UpdatedWeapon>();
+
+            // Find new weapons (non existing)
+            var newWeapons = updatedMatchPlayer.Body.Weapons
+                .Except(updatedWeapons.Select(uw => uw.Body))
+                .Select(w => new UpdatedWeapon
+                {
+                    Model = new WeaponModel
+                    {
+                        MatchPlayerId = updatedMatchPlayer.Model.Id,
+                        Name = w.Name
+                    },
+                    Body = w
+                }).ToList();
+
+            if (newWeapons.Count > 0)
+            {
+                // Insert new match players to the DB
+                await this.dbContext.Weapon.AddRangeAsync(newWeapons.Select(uw => uw.Model));
+
+                // Save the new match players to the DB
+                await this.dbContext.SaveChangesAsync();
+
+                // Add the list of new match players to the list of updated match players
+                updatedWeapons.AddRange(newWeapons);
+            }
+
+            return updatedWeapons;
+        }
+
+        private async Task<List<UpdatedMatchPlayer>> GetMatchPlayersToUpdate(MatchStatsBody matchStats)
+        {
+            // Find existing match players
+            var updatedMatchPlayers =
+                await (from mp in this.dbContext.MatchPlayer
+                        join ps in matchStats.Players
+                            on mp.SteamId equals ps.SteamId
+                        where mp.MatchId == matchStats.MatchId
+                        select new UpdatedMatchPlayer { Model = mp, Body = ps})
+                    .Include(ump => ump.Model.Weapons).ToListAsync();
+
+            // Find new match players (non existing)
+            var newMatchPlayers = matchStats.Players
+                .Except(updatedMatchPlayers.Select(ump => ump.Body))
+                .Select(ps => new UpdatedMatchPlayer
+                {
+                    Model = new MatchPlayerModel
+                    {
+                        MatchId = matchStats.MatchId,
+                        Name = ps.GetBase64DecodedName(),
+                        SteamId = ps.SteamId
+                    },
+                    Body = ps
                 }).ToList();
 
             if (newMatchPlayers.Count > 0)
             {
-                await this.dbContext.MatchPlayer.AddRangeAsync(newMatchPlayers);
+                // Insert new match players to the DB
+                await this.dbContext.MatchPlayer.AddRangeAsync(newMatchPlayers.Select(nmp => nmp.Model));
+
+                // Save the new match players to the DB
+                await this.dbContext.SaveChangesAsync();
+
+                // Add the list of new match players to the list of updated match players
+                updatedMatchPlayers.AddRange(newMatchPlayers);
             }
 
-            await this.dbContext.SaveChangesAsync();
+            return updatedMatchPlayers;
+        }
+
+        private async Task AppendWeaponTargets(UpdatedWeapon updatedWeapon)
+        {
+            // Find existing weapon targets
+            var updatedWeaponTargets = updatedWeapon.Model.WeaponTargets?.Join(
+                updatedWeapon.Body.Targets,
+                wt => new {wt.SteamId, wt.Type},
+                wt => new {wt.SteamId, Type = wt.Type.ToString()},
+                (wtm, wtb) => new {Model = wtm, Body = wtb}).ToList();
+
+            if (updatedWeaponTargets != null)
+            {
+                // Update all existing weapon target models
+                foreach (var updatedWeaponTarget in updatedWeaponTargets)
+                {
+                    updatedWeaponTarget.Model.Count += updatedWeaponTarget.Body.Count;
+                    updatedWeaponTarget.Model.HeadshotCount += updatedWeaponTarget.Body.HeadshotCount;
+                }
+            }
+
+            // Create new weapon target models
+            var newWeaponTargetModels = (updatedWeaponTargets != null
+                    ? updatedWeapon.Body.Targets.Except(updatedWeaponTargets.Select(uwt => uwt.Body))
+                    : updatedWeapon.Body.Targets)
+                .Select(wt => new WeaponTargetModel
+                {
+                    WeaponId = updatedWeapon.Model.Id,
+                    Count = wt.Count,
+                    HeadshotCount = wt.HeadshotCount,
+                    SteamId = wt.SteamId,
+                    Type = wt.Type.ToString()
+                });
+
+            // Insert new weapon targets to the DB
+            await this.dbContext.WeaponTarget.AddRangeAsync(newWeaponTargetModels);
         }
 
         public async Task EndMatch(GameServerIdentityContainer apiUserIdentity, MatchEndBody matchEnd)
@@ -145,8 +259,8 @@ namespace L4DStatsApi.Services
                 result.SteamId = model.SteamId;
                 result.Name = model.Name;
                 result.Base64EncodedName = model.GetBase64EncodedName();
-                result.Kills += model.Kills;
-                result.Deaths += model.Deaths;
+                result.Kills += 0; // Todo: Change to DB view
+                result.Deaths += 0; // Todo: Change to DB view
 
                 return result;
             });
@@ -182,8 +296,8 @@ namespace L4DStatsApi.Services
                         result.SteamId = model.SteamId;
                         result.Name = model.Name;
                         result.Base64EncodedName = model.GetBase64EncodedName();
-                        result.Kills += model.Kills;
-                        result.Deaths += model.Deaths;
+                        result.Kills += 0; // Todo: Change to DB view
+                        result.Deaths += 0; // Todo: Change to DB view
 
                         return result;
                     }));

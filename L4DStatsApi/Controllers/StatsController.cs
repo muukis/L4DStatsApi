@@ -68,20 +68,20 @@ namespace L4DStatsApi.Controllers
         }
 
         /// <summary>
-        /// Save match statistics. You can save match statistics as many times as you want, as long as the match has not ended. All stats saved are added to existing match stats.
+        /// Append match statistics. You can save match statistics as many times as you want, as long as the match has not ended. All stats saved are appended to existing match stats.
         /// </summary>
         /// <param name="matchStats">Match statistics. <see cref="MatchStatsBody"/></param>
         [HttpPost]
         [Route("match")]
-        [SwaggerOperation("SaveMatchStats")]
+        [SwaggerOperation("AppendMatchStats")]
         [SwaggerResponse(200, typeof(void))]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
-        public async Task<IActionResult> SaveMatchStats([FromBody] MatchStatsBody matchStats)
+        public async Task<IActionResult> AppendMatchStats([FromBody] MatchStatsBody matchStats)
         {
             try
             {
-                await service.SaveMatchStats(GetApiUserIdentityContainer(), matchStats);
+                await service.AppendMatchStats(GetApiUserIdentityContainer(), matchStats);
                 return Ok();
             }
             catch (Exception)
