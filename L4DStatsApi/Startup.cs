@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using AutoMapper;
 using L4DStatsApi.Interfaces;
 using L4DStatsApi.Services;
 using L4DStatsApi.Support;
@@ -102,6 +103,7 @@ namespace L4DStatsApi
             });
             
             services.AddApplicationInsightsTelemetry(Configuration);
+            services.AddAutoMapper();
 
             services
                 .AddMvc()

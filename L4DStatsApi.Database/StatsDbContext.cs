@@ -22,6 +22,10 @@ namespace L4DStatsApi
         public DbSet<WeaponModel> Weapon { get; set; }
         public DbSet<WeaponTargetModel> WeaponTarget { get; set; }
 
+        public DbQuery<PlayerStatsFullModel> PlayerStatsFull { get; set; }
+        public DbQuery<PlayerStatsWeaponModel> PlayerStatsWeapon { get; set; }
+        public DbQuery<PlayerStatsBasicModel> PlayerStatsBasic { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new GameServerGroupMap());
@@ -30,6 +34,10 @@ namespace L4DStatsApi
             modelBuilder.ApplyConfiguration(new MatchPlayerMap());
             modelBuilder.ApplyConfiguration(new WeaponMap());
             modelBuilder.ApplyConfiguration(new WeaponTargetMap());
+
+            modelBuilder.Query<PlayerStatsFullModel>().ToView("PlayerStatsFull");
+            modelBuilder.Query<PlayerStatsWeaponModel>().ToView("PlayerStatsWeapon");
+            modelBuilder.Query<PlayerStatsBasicModel>().ToView("PlayerStatsBasic");
         }
 
         public async Task ValidateGameServerIdentity(GameServerIdentityContainer apiUserIdentity)

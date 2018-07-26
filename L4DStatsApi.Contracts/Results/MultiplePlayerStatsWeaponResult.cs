@@ -2,9 +2,9 @@
 
 namespace L4DStatsApi.Results
 {
-    public class MultiplePlayerStatsResult
+    public class MultiplePlayerStatsWeaponResult
     {
         public int TotalPlayersCount { get; set; }
-        public List<PlayerStatsResult> Players { get; set; }
+        public List<PlayerStatsWeaponResult> Players { get; set; }
     }
 }

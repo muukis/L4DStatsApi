@@ -42,13 +42,14 @@
                 <div><span style="color: darkblue">gameServerPrivateKey:</span> <input type="text" style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServer.PrivateKey" /></div>
                 <div><span style="color: darkblue">gameServerPublicKey:</span> <input type="text" style="width: 270px" onClick="this.setSelectionRange(0, this.value.length)" value="@gameServer.PublicKey" /></div>
                 <div><span style="color: darkblue">Matches played: @(gameServer.Matches?.Count ?? 0)</span></div>
+                <div><span style="color: darkblue">Last active: @((gameServer.LastActive ?? DateTime.MinValue).ToString("F"))</span></div>
                 <div>
                     <form method="post" asp-page-handler="DeleteGameServer" onsubmit="return confirm('Do you really want to delete game server and all its match data?');">
                         <input type="hidden" name="deleteGameServerPrivateKey" value="@gameServer.PrivateKey" />
                         <input type="submit" value="Delete game server">
                     </form>
                     <form method="post" asp-page-handler="ToggleGameServer">
-                        <input type="hidden" name="toggleGameServerPrivateKey" value="@gameServer.PrivateKey"/>
+                        <input type="hidden" name="toggleGameServerPrivateKey" value="@gameServer.PrivateKey" />
                         <input type="submit" value="Toggle game server (current: @(gameServer.IsActive ? "enabled" : "disabled"))">
                     </form>
                 </div>

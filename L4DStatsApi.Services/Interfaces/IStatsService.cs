@@ -15,7 +15,9 @@ namespace L4DStatsApi.Interfaces
         Task AppendMatchStats(GameServerIdentityContainer apiUserIdentity, MatchStatsBody matchStats);
         Task EndMatch(GameServerIdentityContainer apiUserIdentity, MatchEndBody matchEnd);
         Task<PlayerStatsResult> GetPlayerStats(string steamId, Func<MatchPlayerModel, bool> additionalValidation = null);
-        Task<MultiplePlayerStatsResult> GetPlayers(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null);
+        Task<MultiplePlayerStatsBasicResult> GetBasicPlayerStats(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null);
+        Task<MultiplePlayerStatsWeaponResult> GetWeaponPlayerStats(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null);
+        Task<MultiplePlayerStatsFullResult> GetFullPlayerStats(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null);
         Task<MatchStatsWithPlayersResult> GetMatchStatsWithPlayers(Guid matchId);
         Task<MultipleMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey);
         Task<List<GameServerResult>> GetGameServerGroupGameServers(Guid gameServerGroupPublicKey);

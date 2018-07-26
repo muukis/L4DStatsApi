@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using AutoMapper;
 using L4DStatsApi.Helpers.Database;
 using L4DStatsApi.Interfaces;
 using L4DStatsApi.Models;
@@ -17,11 +19,13 @@ namespace L4DStatsApi.Services
     public class StatsService : IStatsService
     {
         private readonly IConfiguration configuration;
+        private readonly IMapper mapper;
         private readonly StatsDbContext dbContext;
 
-        public StatsService(IConfiguration configuration, StatsDbContext dbContext)
+        public StatsService(IConfiguration configuration, IMapper mapper, StatsDbContext dbContext)
         {
             this.configuration = configuration;
+            this.mapper = mapper;
             this.dbContext = dbContext;
         }
 
@@ -268,45 +272,22 @@ namespace L4DStatsApi.Services
             return playerStats;
         }
 
-        public async Task<MultiplePlayerStatsResult> GetPlayers(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null)
+        public async Task<MultiplePlayerStatsBasicResult> GetBasicPlayerStats(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Expression<Func<PlayerStatsBasicModel, bool>> additionalValidation)
         {
-            var matchPlayerModels =
-                await this.dbContext.MatchPlayer
-                    .Include(mp => mp.Match)
-                    .Where(mp => mp.Match.GameServer.IsValid
-                                 && mp.Match.GameServer.Group.IsValid).ToListAsync();
+            var playerStatsModels =
+                await this.dbContext.PlayerStatsBasic.Where(additionalValidation).ToListAsync();
 
-            if (additionalValidation != null)
-            {
-                matchPlayerModels = matchPlayerModels.Where(additionalValidation).ToList();
-            }
-
-            if (matchPlayerModels.Count == 0)
+            if (playerStatsModels.Count == 0)
             {
                 return null;
             }
 
-            List<PlayerStatsResult> playersStats = new List<PlayerStatsResult>();
-
-            foreach (string steamId in matchPlayerModels.Select(mp => mp.SteamId).Distinct())
-            {
-                playersStats.Add(matchPlayerModels.Where(mp => mp.SteamId == steamId)
-                    .Aggregate(new PlayerStatsResult(), (result, model) =>
-                    {
-                        result.SteamId = model.SteamId;
-                        result.Name = model.Name;
-                        result.Base64EncodedName = model.GetBase64EncodedName();
-                        result.Kills += 0; // Todo: Change to DB view
-                        result.Deaths += 0; // Todo: Change to DB view
-
-                        return result;
-                    }));
-            }
+            var playersStats = playerStatsModels.Select(o => this.mapper.Map<PlayerStatsBasicResult>(o)).ToList();
 
             int totalPlayersCount = playersStats.Count;
             playersStats = playersStats.Sort(sortOrder).Skip(startingIndex).Take(pageSize).ToList();
 
-            return new MultiplePlayerStatsResult
+            return new MultiplePlayerStatsBasicResult
             {
                 TotalPlayersCount = totalPlayersCount,
                 Players = playersStats

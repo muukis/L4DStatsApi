@@ -145,16 +145,16 @@ namespace L4DStatsApi.Controllers
         }
 
         /// <summary>
-        /// Get player game statistics globally.
+        /// Get basic player game statistics globally.
         /// </summary>
         /// <param name="startingIndex">Starting index. (starting from zero)</param>
         /// <param name="pageSize">Page size.</param>
         /// <param name="sortOrder">List sort order.</param>
-        /// <returns><see cref="MultiplePlayerStatsResult"/> object.</returns>
+        /// <returns><see cref="MultiplePlayerStatsBasicResult"/> object.</returns>
         [HttpGet]
         [Route("player/{startingIndex}/{pageSize}/{sortOrder}")]
         [SwaggerOperation("GetPlayers")]
-        [SwaggerResponse(200, typeof(MultiplePlayerStatsResult), "List of player statistics")]
+        [SwaggerResponse(200, typeof(MultiplePlayerStatsBasicResult), "List of basic player statistics")]
         [SwaggerResponse(500, typeof(ErrorResult), "Internal server error")]
         [SwaggerResponse(404, typeof(ErrorResult), "Players not found")]
         public async Task<IActionResult> GetPlayersStats([FromRoute] int startingIndex, [FromRoute] int pageSize, [FromRoute] PlayerSortOrder sortOrder)
@@ -171,7 +171,7 @@ namespace L4DStatsApi.Controllers
                     throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
                 }
 
-                var playerStats = await service.GetPlayers(startingIndex, pageSize, sortOrder);
+                var playerStats = await service.GetBasicPlayerStats(startingIndex, pageSize, sortOrder);
 
                 if (playerStats == null)
                 {
@@ -222,7 +222,7 @@ namespace L4DStatsApi.Controllers
                     throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
                 }
 
-                var playerStats = await service.GetPlayers(startingIndex, pageSize, sortOrder, mp => mp.Match.GameServer.Group.PublicKey == gameServerGroupPublicKey);
+                var playerStats = await service.GetBasicPlayerStats(startingIndex, pageSize, sortOrder, mp => mp.Match.GameServer.Group.PublicKey == gameServerGroupPublicKey);
 
                 if (playerStats == null)
                 {
@@ -273,7 +273,7 @@ namespace L4DStatsApi.Controllers
                     throw new ArgumentException($"Maximum page size exceeded ({maxPageSize})", nameof(pageSize));
                 }
 
-                var playerStats = await service.GetPlayers(startingIndex, pageSize, sortOrder, mp => mp.Match.GameServer.PublicKey == gameServerPublicKey);
+                var playerStats = await service.GetBasicPlayerStats(startingIndex, pageSize, sortOrder, mp => mp.Match.GameServer.PublicKey == gameServerPublicKey);
 
                 if (playerStats == null)
                 {
