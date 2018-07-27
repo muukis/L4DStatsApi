@@ -6,5 +6,6 @@
         public int HeadshotCount { get; set; }
         public string TargetType { get; set; }
         public string SteamId { get; set; }
+        public string PlayerName { get; set; }
     }
 }

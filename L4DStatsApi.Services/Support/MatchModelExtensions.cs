@@ -20,14 +20,14 @@ namespace L4DStatsApi.Support
                 MatchStartTime = match.StartTime ?? DateTime.MinValue,
                 LastActiveTime = match.LastActive ?? DateTime.MinValue,
                 HasEnded = match.HasEnded,
-                Players = match.Players.Select(p => new PlayerStatsResult
-                {
-                    SteamId = p.SteamId,
-                    Name = p.Name,
-                    Base64EncodedName = p.GetBase64EncodedName(),
-                    Kills = 0, // Todo: Change to DB view
-                    Deaths = 0 // Todo: Change to DB view
-                }).ToList()
+                //Players = match.Players.Select(p => new PlayerStatsResult
+                //{
+                //    SteamId = p.SteamId,
+                //    Name = p.Name,
+                //    Base64EncodedName = p.GetBase64EncodedName(),
+                //    Kills = 0, // Todo: Change to DB view
+                //    Deaths = 0 // Todo: Change to DB view
+                //}).ToList()
             };
         }
     }

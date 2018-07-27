@@ -7,13 +7,13 @@ namespace L4DStatsApi.Support
     public enum PlayerSortOrder
     {
         None,
-        NameAsc,
+        Name,
         NameDesc,
-        KillsAsc,
-        KillsDesc,
-        DeathsAsc,
-        DeathsDesc,
-        KillDeathRatioAsc,
-        KillDeathRatioDesc
+        Count,
+        CountDesc,
+        Headshot,
+        HeadshotDesc,
+        HeadshotRatio,
+        HeadshotRatioDesc
     }
 }

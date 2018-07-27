@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using L4DStatsApi.Helpers.Database;
 using L4DStatsApi.Models;
@@ -14,10 +15,10 @@ namespace L4DStatsApi.Interfaces
         Task<MatchStartedResult> StartMatch(GameServerIdentityContainer apiUserIdentity, MatchStartBody matchStart);
         Task AppendMatchStats(GameServerIdentityContainer apiUserIdentity, MatchStatsBody matchStats);
         Task EndMatch(GameServerIdentityContainer apiUserIdentity, MatchEndBody matchEnd);
-        Task<PlayerStatsResult> GetPlayerStats(string steamId, Func<MatchPlayerModel, bool> additionalValidation = null);
-        Task<MultiplePlayerStatsBasicResult> GetBasicPlayerStats(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null);
-        Task<MultiplePlayerStatsWeaponResult> GetWeaponPlayerStats(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null);
-        Task<MultiplePlayerStatsFullResult> GetFullPlayerStats(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Func<MatchPlayerModel, bool> additionalValidation = null);
+        Task<MultiplePlayerStatsBasicResult> GetPlayerStatsBasic(Expression<Func<PlayerStatsFullModel, bool>> additionalValidation);
+        Task<MultiplePlayerStatsWeaponResult> GetPlayerStatsWeapon(Expression<Func<PlayerStatsFullModel, bool>> additionalValidation);
+        Task<MultiplePlayerStatsBasicResult> GetPlayerStatsBasic(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Expression<Func<PlayerStatsFullModel, bool>> additionalValidation);
+        Task<MultiplePlayerStatsWeaponResult> GetPlayerStatsWeapon(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Expression<Func<PlayerStatsFullModel, bool>> additionalValidation);
         Task<MatchStatsWithPlayersResult> GetMatchStatsWithPlayers(Guid matchId);
         Task<MultipleMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey);
         Task<List<GameServerResult>> GetGameServerGroupGameServers(Guid gameServerGroupPublicKey);

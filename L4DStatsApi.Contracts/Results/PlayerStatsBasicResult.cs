@@ -1,4 +1,6 @@
-﻿namespace L4DStatsApi.Results
+﻿using L4DStatsApi.Support;
+
+namespace L4DStatsApi.Results
 {
     public class PlayerStatsBasicResult
     {
@@ -6,5 +8,6 @@
         public int HeadshotCount { get; set; }
         public string TargetType { get; set; }
         public string SteamId { get; set; }
+        public string PlayerName { get; set; }
     }
 }

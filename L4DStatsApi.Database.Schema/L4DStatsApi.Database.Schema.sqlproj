@@ -70,8 +70,6 @@
     <Build Include="dbo\Tables\MatchPlayer.sql" />
     <Build Include="dbo\Tables\Weapon.sql" />
     <Build Include="dbo\Tables\WeaponTarget.sql" />
-    <Build Include="dbo\Views\PlayerStatsBasic.sql" />
-    <Build Include="dbo\Views\PlayerStatsWeapon.sql" />
     <Build Include="dbo\Views\PlayerStatsFull.sql" />
   </ItemGroup>
   <ItemGroup>

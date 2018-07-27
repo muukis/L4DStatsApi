@@ -240,57 +240,81 @@ namespace L4DStatsApi.Services
             await this.dbContext.SaveChangesAsync();
         }
 
-        public async Task<PlayerStatsResult> GetPlayerStats(string steamId, Func<MatchPlayerModel, bool> additionalValidation = null)
+        public async Task<MultiplePlayerStatsBasicResult> GetPlayerStatsBasic(Expression<Func<PlayerStatsFullModel, bool>> additionalValidation)
         {
-            var matchPlayerModels =
-                await this.dbContext.MatchPlayer.Include(mp => mp.Match)
-                    .Where(mp => mp.SteamId == steamId
-                                 && mp.Match.GameServer.IsValid
-                                 && mp.Match.GameServer.Group.IsValid).ToListAsync();
+            var playerStatsList = await this.dbContext.PlayerStatsFull
+                .GroupToBasicModel(additionalValidation)
+                .ToListAsync();
 
-            if (additionalValidation != null)
-            {
-                matchPlayerModels = matchPlayerModels.Where(additionalValidation).ToList();
-            }
-
-            if (matchPlayerModels.Count == 0)
+            if (playerStatsList.Count == 0)
             {
                 return null;
             }
-
-            var playerStats = matchPlayerModels.Aggregate(new PlayerStatsResult(), (result, model) =>
-            {
-                result.SteamId = model.SteamId;
-                result.Name = model.Name;
-                result.Base64EncodedName = model.GetBase64EncodedName();
-                result.Kills += 0; // Todo: Change to DB view
-                result.Deaths += 0; // Todo: Change to DB view
-
-                return result;
-            });
-
-            return playerStats;
-        }
-
-        public async Task<MultiplePlayerStatsBasicResult> GetBasicPlayerStats(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Expression<Func<PlayerStatsBasicModel, bool>> additionalValidation)
-        {
-            var playerStatsModels =
-                await this.dbContext.PlayerStatsBasic.Where(additionalValidation).ToListAsync();
-
-            if (playerStatsModels.Count == 0)
-            {
-                return null;
-            }
-
-            var playersStats = playerStatsModels.Select(o => this.mapper.Map<PlayerStatsBasicResult>(o)).ToList();
-
-            int totalPlayersCount = playersStats.Count;
-            playersStats = playersStats.Sort(sortOrder).Skip(startingIndex).Take(pageSize).ToList();
 
             return new MultiplePlayerStatsBasicResult
             {
-                TotalPlayersCount = totalPlayersCount,
-                Players = playersStats
+                TotalPlayersCount = await this.dbContext.PlayerStatsFull.GroupToBasicModel(additionalValidation).CountAsync(),
+                Players = playerStatsList.Select(o => mapper.Map<PlayerStatsBasicResult>(o)).ToList()
+            };
+        }
+
+        public async Task<MultiplePlayerStatsWeaponResult> GetPlayerStatsWeapon(Expression<Func<PlayerStatsFullModel, bool>> additionalValidation)
+        {
+            var playerStatsList = await this.dbContext.PlayerStatsFull
+                .GroupToWeaponModel(additionalValidation)
+                .ToListAsync();
+
+            if (playerStatsList.Count == 0)
+            {
+                return null;
+            }
+
+            return new MultiplePlayerStatsWeaponResult
+            {
+                TotalPlayersCount = await this.dbContext.PlayerStatsFull.GroupToWeaponModel(additionalValidation).CountAsync(),
+                Players = playerStatsList.Select(o => mapper.Map<PlayerStatsWeaponResult>(o)).ToList()
+            };
+        }
+
+        public async Task<MultiplePlayerStatsBasicResult> GetPlayerStatsBasic(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Expression<Func<PlayerStatsFullModel, bool>> additionalValidation)
+        {
+            var playerStatsList = await this.dbContext.PlayerStatsFull
+                .OrderBy(sortOrder)
+                .Skip(startingIndex)
+                .Take(pageSize)
+                .GroupToBasicModel(additionalValidation)
+                .ToListAsync();
+
+            if (playerStatsList.Count == 0)
+            {
+                return null;
+            }
+
+            return new MultiplePlayerStatsBasicResult
+            {
+                TotalPlayersCount = await this.dbContext.PlayerStatsFull.GroupToBasicModel(additionalValidation).CountAsync(),
+                Players = playerStatsList.Select(o => mapper.Map<PlayerStatsBasicResult>(o)).ToList()
+            };
+        }
+
+        public async Task<MultiplePlayerStatsWeaponResult> GetPlayerStatsWeapon(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Expression<Func<PlayerStatsFullModel, bool>> additionalValidation)
+        {
+            var playerStatsList = await this.dbContext.PlayerStatsFull
+                .OrderBy(sortOrder)
+                .Skip(startingIndex)
+                .Take(pageSize)
+                .GroupToWeaponModel(additionalValidation)
+                .ToListAsync();
+
+            if (playerStatsList.Count == 0)
+            {
+                return null;
+            }
+
+            return new MultiplePlayerStatsWeaponResult
+            {
+                TotalPlayersCount = await this.dbContext.PlayerStatsFull.GroupToWeaponModel(additionalValidation).CountAsync(),
+                Players = playerStatsList.Select(o => mapper.Map<PlayerStatsWeaponResult>(o)).ToList()
             };
         }
 
