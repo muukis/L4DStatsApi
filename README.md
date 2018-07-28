@@ -7,7 +7,7 @@ Restfulness for L4D Custom Player Stats.
 * SourceMod extension: **REST in Pawn** - Communicate with JSON REST APIs (https://forums.alliedmods.net/showthread.php?t=298024).
 
 # Requirements for hosting the REST API
-* Any system that can run **ASP.NET Core 2.1**.
+* Any system that can run **ASP.NET Core 2.1.2**.
 * I am currently developing the API only for the **Microsoft SQL servers** (using the EF Core packages). Other databases shouldn't be too hard to add later on (https://docs.microsoft.com/en-us/ef/core/providers).
 
 # Game server SourceMod plugin install instructions
