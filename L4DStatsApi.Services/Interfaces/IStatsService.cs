@@ -20,10 +20,15 @@ namespace L4DStatsApi.Interfaces
         Task<MultiplePlayerStatsBasicResult> GetPlayerStatsBasic(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Expression<Func<PlayerStatsFullModel, bool>> additionalValidation);
         Task<MultiplePlayerStatsWeaponResult> GetPlayerStatsWeapon(int startingIndex, int pageSize, PlayerSortOrder sortOrder, Expression<Func<PlayerStatsFullModel, bool>> additionalValidation);
         Task<MatchStatsWithPlayersResult> GetMatchStatsWithPlayers(Guid matchId);
-        Task<MultipleMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey);
+        Task<GameServerMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey);
         Task<List<GameServerResult>> GetGameServerGroupGameServers(Guid gameServerGroupPublicKey);
+        Task<GameServerMatchStatsResult> GetGameServerLatestMatches(int startingIndex, int pageSize, Guid gameServerPublicKey);
+        Task<GameServerGroupMatchStatsResult> GetGameServerGroupLatestMatches(int startingIndex, int pageSize, Guid gameServerGroupPublicKey);
         Task<MatchStatsWithPlayersResult> GetGameServerLatestMatch(Guid gameServerPublicKey);
         Task<MultipleMatchStatsWithPlayersResult> GetOngoingMatches(int startingIndex, int pageSize);
         Task<MultipleMatchStatsWithPlayersResult> GetGameServerGroupOngoingMatches(int startingIndex, int pageSize, Guid gameServerGroupPublicKey);
+        Task<List<WeaponBaseResult>> GetWeaponNames();
+        Task<List<WeaponLethalityResult>> GetWeaponLethalities();
+        Task<List<WeaponHeadshotKillRatioResult>> GetWeaponHeadshotKillRatios();
     }
 }

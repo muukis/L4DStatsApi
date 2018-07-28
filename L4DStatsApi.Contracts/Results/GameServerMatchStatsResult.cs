@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace L4DStatsApi.Results
 {
-    public class MultipleMatchStatsResult
+    public class GameServerMatchStatsResult
     {
         public string GameServerName { get; set; }
         public Guid GameServerPublicKey { get; set; }

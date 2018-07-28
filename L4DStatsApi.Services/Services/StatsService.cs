@@ -331,7 +331,7 @@ namespace L4DStatsApi.Services
             return match?.CreateMatchStatsWithPlayersResult();
         }
 
-        public async Task<MultipleMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey)
+        public async Task<GameServerMatchStatsResult> GetGameServerMatchStats(int startingIndex, int pageSize, Guid gameServerPublicKey)
         {
             var gameServer = await this.dbContext.GameServer
                 .Where(gs => gs.PublicKey == gameServerPublicKey
@@ -359,21 +359,12 @@ namespace L4DStatsApi.Services
                 .Where(m => m.GameServerId == gameServer.Id)
                 .CountAsync();
 
-            return new MultipleMatchStatsResult
+            return new GameServerMatchStatsResult
             {
                 GameServerName = gameServerMatches[0].GameServer.Name,
                 GameServerPublicKey = gameServerMatches[0].GameServer.PublicKey,
                 TotalMatchCount = totalMatchCount,
-                Matches = gameServerMatches.Select(m => new MatchStatsResult
-                {
-                    MatchId = m.Id,
-                    GameName = m.GameName,
-                    MapName = m.MapName,
-                    MatchType = m.Type,
-                    MatchStartTime = m.StartTime ?? DateTime.MinValue,
-                    LastActiveTime = m.LastActive ?? DateTime.MinValue,
-                    HasEnded = m.HasEnded
-                }).ToList()
+                Matches = gameServerMatches.Select(m => this.mapper.Map<MatchStatsResult>(m)).ToList()
             };
         }
 
@@ -400,6 +391,83 @@ namespace L4DStatsApi.Services
                 Name = gs.Name,
                 LastActive = gs.LastActive ?? DateTime.MinValue
             }).ToList();
+        }
+
+        public async Task<GameServerMatchStatsResult> GetGameServerLatestMatches(int startingIndex, int pageSize, Guid gameServerPublicKey)
+        {
+            var gameServer = await this.dbContext.GameServer
+                .Where(gs => gs.PublicKey == gameServerPublicKey
+                             && gs.IsValid
+                             && gs.Group.IsValid)
+                .SingleOrDefaultAsync();
+
+            if (gameServer == null)
+            {
+                return null;
+            }
+
+            var matches = await this.dbContext.Match
+                .Where(m => m.GameServer.PublicKey == gameServerPublicKey)
+                .OrderByDescending(m => m.StartTime ?? DateTime.MinValue)
+                .Skip(startingIndex)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new GameServerMatchStatsResult
+            {
+                GameServerName = gameServer.Name,
+                GameServerPublicKey = gameServer.PublicKey,
+                TotalMatchCount = await this.dbContext.Match
+                    .Where(m => m.GameServer.PublicKey == gameServerPublicKey)
+                    .CountAsync(),
+                Matches = matches.Select(m => this.mapper.Map<MatchStatsResult>(m)).ToList()
+            };
+        }
+
+        public async Task<GameServerGroupMatchStatsResult> GetGameServerGroupLatestMatches(int startingIndex, int pageSize, Guid gameServerGroupPublicKey)
+        {
+            var gameServerGroup = await this.dbContext.GameServerGroup
+                .Where(gsg => gsg.PublicKey == gameServerGroupPublicKey
+                              && gsg.IsValid)
+                .SingleOrDefaultAsync();
+
+            if (gameServerGroup == null)
+            {
+                return null;
+            }
+
+            var matches = await this.dbContext.Match
+                .Where(m => m.GameServer.IsValid && m.GameServer.GroupId == gameServerGroup.Id)
+                .OrderByDescending(m => m.StartTime ?? DateTime.MinValue)
+                .Skip(startingIndex)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new GameServerGroupMatchStatsResult
+            {
+                GameServerGroupPublicKey = gameServerGroupPublicKey,
+                TotalMatchCount = await this.dbContext.Match
+                    .Where(m => m.GameServer.IsValid && m.GameServer.GroupId == gameServerGroup.Id)
+                    .CountAsync(),
+                GameServerMatches = matches
+                    .Select(m => m.GameServerId)
+                    .Distinct()
+                    .Select(gameServerId =>
+                    {
+                        var gsMatches = matches
+                            .Where(m => m.GameServerId == gameServerId)
+                            .ToList();
+
+                        return new GameServerMatchStatsResult
+                        {
+                            GameServerName = gsMatches[0].GameServer.Name,
+                            GameServerPublicKey = gsMatches[0].GameServer.PublicKey,
+                            TotalMatchCount = this.dbContext.Match
+                                .Count(m => m.GameServer.PublicKey == gsMatches[0].GameServer.PublicKey),
+                            Matches = matches.Select(m => this.mapper.Map<MatchStatsResult>(m)).ToList()
+                        };
+                    }).ToList()
+            };
         }
 
         public async Task<MatchStatsWithPlayersResult> GetGameServerLatestMatch(Guid gameServerPublicKey)
@@ -483,6 +551,45 @@ namespace L4DStatsApi.Services
                 TotalMatchCount = totalMatchCount,
                 Matches = matches.Select(m => m.CreateMatchStatsWithPlayersResult()).ToList()
             };
+        }
+
+        public async Task<List<WeaponBaseResult>> GetWeaponNames()
+        {
+            return await this.dbContext.Weapon.Select(w => w.Name).Distinct().OrderBy(w => w)
+                .Select(w => new WeaponBaseResult {Name = w}).ToListAsync();
+        }
+
+        public async Task<List<WeaponLethalityResult>> GetWeaponLethalities()
+        {
+            return await this.dbContext.WeaponTarget
+                .Where(wt => wt.Type == WeaponTargetTypes.Kill.ToString())
+                .GroupBy(wt => wt.Weapon.Name)
+                .Select(o => new WeaponLethalityResult
+                {
+                    Name = o.Key,
+                    Kills = o.Sum(p => p.Count)
+                })
+                .OrderByDescending(o => o.Kills)
+                .ToListAsync();
+        }
+
+        public async Task<List<WeaponHeadshotKillRatioResult>> GetWeaponHeadshotKillRatios()
+        {
+            return (await this.dbContext.WeaponTarget
+                .Where(wt => wt.Type == WeaponTargetTypes.Kill.ToString())
+                .GroupBy(wt => wt.Weapon.Name)
+                .Select(o => new
+                {
+                    Name = o.Key,
+                    Kills = o.Sum(p => p.Count),
+                    HeadshotKills = o.Sum(p => p.HeadshotCount)
+                })
+                .ToListAsync()).Select(w => new WeaponHeadshotKillRatioResult
+                {
+                    Name = w.Name,
+                    HeadshotKillRatio = w.HeadshotKills / (float) w.Kills
+                })
+                .ToList();
         }
     }
 }

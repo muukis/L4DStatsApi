@@ -12,6 +12,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace L4DStatsApi.Controllers
 {
+    /// <summary>
+    /// Stats controller. (Requires authorization)
+    /// </summary>
     [Route("api/[controller]")]
     [Produces("application/json")]
     [ApiController]
@@ -21,6 +24,11 @@ namespace L4DStatsApi.Controllers
         private readonly IConfiguration configuration;
         private readonly IStatsService service;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="service"></param>
         public StatsController(IConfiguration configuration, IStatsService service)
         {
             this.configuration = configuration;
@@ -46,7 +54,7 @@ namespace L4DStatsApi.Controllers
         /// <param name="matchStart">Match starting properties. <see cref="MatchStatsBody"/></param>
         /// <returns><see cref="MatchStartedResult"/> object.</returns>
         [HttpPost]
-        [Route("match/start")]
+        [Route("start")]
         [SwaggerOperation("StartMatch")]
         [SwaggerResponse(200, typeof(MatchStartedResult), "Match ID")]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
@@ -72,7 +80,7 @@ namespace L4DStatsApi.Controllers
         /// </summary>
         /// <param name="matchStats">Match statistics. <see cref="MatchStatsBody"/></param>
         [HttpPost]
-        [Route("match")]
+        [Route("append")]
         [SwaggerOperation("AppendMatchStats")]
         [SwaggerResponse(200, typeof(void))]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]
@@ -99,7 +107,7 @@ namespace L4DStatsApi.Controllers
         /// </summary>
         /// <param name="matchEnd">Match ending properties. <see cref="MatchEndBody"/></param>
         [HttpPost]
-        [Route("match/end")]
+        [Route("end")]
         [SwaggerOperation("EndMatch")]
         [SwaggerResponse(200, typeof(void))]
         [SwaggerResponse(400, typeof(ErrorResult), "Invalid request")]

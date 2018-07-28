@@ -11,6 +11,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace L4DStatsApi.Controllers
 {
+    /// <summary>
+    /// Identity controller. (Public)
+    /// </summary>
     [Route("api/[controller]")]
     [Produces("application/json")]
     [ApiController]
@@ -19,6 +22,11 @@ namespace L4DStatsApi.Controllers
         private readonly IConfiguration configuration;
         private readonly IIdentityService service;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="service"></param>
         public IdentityController(IConfiguration configuration, IIdentityService service)
         {
             this.configuration = configuration;

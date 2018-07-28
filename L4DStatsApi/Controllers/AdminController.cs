@@ -4,20 +4,35 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace L4DStatsApi.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class AdminController : Controller
     {
         private readonly StatsDbContext dbContext;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dbContext"></param>
         public AdminController(StatsDbContext dbContext)
         {
             this.dbContext = dbContext;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Index()
         {
             return View("Index");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public async Task<IActionResult> CreateGameServerGroup()
         {
             var emailAddress = this.dbContext.GetUserEmailAddress(this.User);
@@ -41,6 +56,11 @@ namespace L4DStatsApi.Controllers
             return RedirectToAction("Index", "Admin");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="gameServerName"></param>
+        /// <returns></returns>
         public async Task<IActionResult> CreateGameServer(string gameServerName)
         {
             var emailAddress = this.dbContext.GetUserEmailAddress(this.User);
