@@ -30,8 +30,35 @@
     var ongoingMatches = await @Model.GetOngoingMatches();
 
     <h3>Ongoing matches (matchId):</h3>
-    foreach (var ongoingMatche in ongoingMatches)
+    foreach (var ongoingMatch in ongoingMatches)
     {
-        <div>@ongoingMatche.Id</div>
+        <div>@ongoingMatch.Id</div>
+    }
+
+    const int latestMatchesCount = 5;
+    var latestMatches = await @Model.GetLatestMatches(latestMatchesCount);
+
+    <h3>Latest @latestMatchesCount matches (matchId):</h3>
+    foreach (var latestMatch in latestMatches)
+    {
+        <div>@latestMatch.Id (@((latestMatch.LastActive ?? DateTime.MinValue).ToString("f")))</div>
+    }
+
+    const int mostLeathalWeaponCount = 5;
+    var mostLeathalWeapons = await @Model.GetMostLeathalWeapons(mostLeathalWeaponCount);
+
+    <h3>Most @mostLeathalWeaponCount leathal weapons:</h3>
+    foreach (var leathalWeapon in mostLeathalWeapons)
+    {
+        <div>@leathalWeapon.Name (Kills: @(leathalWeapon.Kills))</div>
+    }
+
+    const int bestHeadshotKillRatioWeaponsCount = 5;
+    var bestHeadshotKillRatioWeapons = await @Model.GetBestHeadshotKillRatioWeapons(bestHeadshotKillRatioWeaponsCount);
+
+    <h3>Best @bestHeadshotKillRatioWeaponsCount headshot per kill ratio weapons:</h3>
+    foreach (var headshotKillRatioWeapon in bestHeadshotKillRatioWeapons)
+    {
+        <div>@headshotKillRatioWeapon.Name (Ratio: @(headshotKillRatioWeapon.HeadshotKillRatio.ToString("0.00")))</div>
     }
 }
