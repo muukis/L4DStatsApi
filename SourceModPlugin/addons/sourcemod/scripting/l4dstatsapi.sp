@@ -177,7 +177,7 @@ public void RequestMapStart()
 	
 	CurrentMatchId = "";
 
-	httpClient.Post("Stats/match/start", matchStartRequest, OnMatchStartReceived);
+	httpClient.Post("Stats/start", matchStartRequest, OnMatchStartReceived);
 	
 	delete matchStartRequest;
 }
@@ -248,7 +248,7 @@ public void RequestMapEnd()
 	matchEndRequest.ToString(json, sizeof(json));
 	PrintToServer("Plugin l4dstatsapi matchEndRequest=%s", json);
 	
-	httpClient.Post("Stats/match/end", matchEndRequest, OnMatchEndReceived);
+	httpClient.Post("Stats/end", matchEndRequest, OnMatchEndReceived);
 	
 	delete matchEndRequest;
 }
@@ -367,7 +367,7 @@ public void SendSinglePlayerStats(PlayerStatsRequest:playerStatsRequest)
 	matchStatsRequest.ToString(json, sizeof(json));
 	PrintToServer("Plugin l4dstatsapi SendSinglePlayerStats() - encodedPlayerName=%s | matchStatsRequest=%s", encodedPlayerName, json);
 
-	httpClient.Post("Stats/match", matchStatsRequest, OnMatchStatsReceived);
+	httpClient.Post("Stats/append", matchStatsRequest, OnMatchStatsReceived);
 	
 	delete players;
 	delete matchStatsRequest;
