@@ -584,11 +584,13 @@ namespace L4DStatsApi.Services
                     Kills = o.Sum(p => p.Count),
                     HeadshotKills = o.Sum(p => p.HeadshotCount)
                 })
-                .ToListAsync()).Select(w => new WeaponHeadshotKillRatioResult
+                .ToListAsync())
+                .Select(w => new WeaponHeadshotKillRatioResult
                 {
                     Name = w.Name,
                     HeadshotKillRatio = w.HeadshotKills / (float) w.Kills
                 })
+                .OrderByDescending(w => w.HeadshotKillRatio)
                 .ToList();
         }
     }
