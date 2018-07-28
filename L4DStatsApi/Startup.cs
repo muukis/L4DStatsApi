@@ -23,7 +23,7 @@ namespace L4DStatsApi
     /// </summary>
     public class Startup
     {
-        private const string API_TITLE = "L4D Custom Player Statistics API";
+        private const string API_TITLE = "Player Statistics API";
         private bool swagger = false;
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace L4DStatsApi
                     new Info
                     {
                         Title = API_TITLE,
-                        Description = "An API for storing and loading L4D player statistics.",
+                        Description = "An API for storing and loading Valve SourceMod supported Source engine game player statistics.",
                         Version = "v1",
                         TermsOfService = "None",
                         Contact = new Contact
