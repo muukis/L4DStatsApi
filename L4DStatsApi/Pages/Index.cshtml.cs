@@ -67,6 +67,7 @@ namespace L4DStatsApi.Pages
                     Kills = g.Sum(wt => wt.Count)
                 })
                 .OrderByDescending(o => o.Kills)
+                .Take(count)
                 .ToListAsync();
         }
 
@@ -90,6 +91,7 @@ namespace L4DStatsApi.Pages
                     HeadshotKillRatio = w.HeadshotKills / (float) w.Kills
                 })
                 .OrderByDescending(w => w.HeadshotKillRatio)
+                .Take(count)
                 .ToList();
         }
     }
