@@ -8,17 +8,6 @@
 #define PLUGIN_VERSION "0.1"
 #define PLUGIN_DESCRIPTION "Global Player Stats and Ranking."
 
-#define GAMEMODE_UNKNOWN -1
-#define GAMEMODE_COOP 0
-#define GAMEMODE_VERSUS 1
-#define GAMEMODE_REALISM 2
-#define GAMEMODE_SURVIVAL 3
-#define GAMEMODE_SCAVENGE 4
-#define GAMEMODE_REALISMVERSUS 5
-#define GAMEMODE_OTHERMUTATIONS 6
-#define GAMEMODES 7
-
-new Handle:cvar_Gamemode = INVALID_HANDLE;
 new Handle:cvar_ApiBaseUrl = INVALID_HANDLE;
 new Handle:cvar_GameServerGroupPrivateKey = INVALID_HANDLE;
 new Handle:cvar_GameServerPrivateKey = INVALID_HANDLE;
@@ -46,8 +35,6 @@ public void OnPluginStart()
 	// Plugin version public Cvar
 	CreateConVar("l4dstatsapi_version", PLUGIN_VERSION, "Custom Player Stats (API) Version", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 
-	cvar_Gamemode = FindConVar("mp_gamemode");
-
 	cvar_ApiBaseUrl = CreateConVar("l4dstatsapi_apibaseurl", "https://pilssi.dy.fi:44033/l4dstatsapi/api", "Base URL for the API (example: https://pilssi.dy.fi:44033/l4dstatsapi/api)");
 	cvar_GameServerGroupPrivateKey = CreateConVar("l4dstatsapi_gameservergroupprivatekey", "[YOUR GAME SERVER GROUP PRIVATE KEY HERE]", "Game server group private key (example: 66edfde5-54d6-4a4d-91b6-40209eb9414c)");
 	cvar_GameServerPrivateKey = CreateConVar("l4dstatsapi_gameserverprivatekey", "[YOUR GAME SERVER PRIVATE KEY HERE]", "Game server private key (example: 4b12123c-896c-4e01-b966-a2cf57b63357)");
@@ -58,7 +45,8 @@ public void OnPluginStart()
 	HookEvent("player_disconnect", event_PlayerDisconnect, EventHookMode_Pre);
 	HookEvent("player_death", event_PlayerDeath);
 	HookEvent("player_hurt", event_PlayerHurt);
-
+	HookEvent("round_end", event_RoundEnd, EventHookMode_Pre);
+	
 	RegAdminCmd("sm_l4dstatsapi_flush", cmd_FlushStats, ADMFLAG_GENERIC, "Flush current statistics");
 
 	GetGameFolderName(GameName, sizeof(GameName));
@@ -78,6 +66,7 @@ public void OnPluginEnd()
 	UnhookEvent("player_disconnect", event_PlayerDisconnect, EventHookMode_Pre);
 	UnhookEvent("player_death", event_PlayerDeath);
 	UnhookEvent("player_hurt", event_PlayerHurt);
+	UnhookEvent("round_end", event_RoundEnd);
 }
 
 public Action:cmd_FlushStats(client, args)
@@ -157,6 +146,64 @@ public void OnIdentityReceived(HTTPResponse response, any value)
 	}
 }
 
+public void GetGameModeName(char[] gameModeName, int len)
+{
+	if (StrEqual(GameName, "left4dead", false) || StrEqual(GameName, "left4dead2", false))
+	{
+		new Handle:l4d_gamemode = FindConVar("mp_gamemode");
+		GetConVarString(l4d_gamemode, gameModeName, len);
+		CloseHandle(l4d_gamemode);
+		return;
+	}
+	else if (StrEqual(GameName, "csgo", false))
+	{
+		new Handle:csgo_gamemode = FindConVar("game_mode");
+		new Handle:csgo_gametype = FindConVar("game_type");
+		
+		int gm = GetConVarInt(csgo_gamemode);
+		int gt = GetConVarInt(csgo_gametype) * 10;
+
+		CloseHandle(csgo_gamemode);
+		CloseHandle(csgo_gametype);
+
+		switch (gm + gt)
+		{
+			case 0:
+			{
+				Format(gameModeName, len, "classic casual");
+				return;
+			}
+			case 1:
+			{
+				Format(gameModeName, len, "classic competitive");
+				return;
+			}
+			case 10:
+			{
+				Format(gameModeName, len, "arms race");
+				return;
+			}
+			case 11:
+			{
+				Format(gameModeName, len, "demolition");
+				return;
+			}
+			case 12:
+			{
+				Format(gameModeName, len, "deathmatch");
+				return;
+			}
+			default:
+			{
+				Format(gameModeName, len, "unknown (%d)", gm + gt);
+				return;
+			}
+		}
+	}
+
+	Format(gameModeName, len, "unknown game (%s)", GameName);
+}
+
 public void RequestMapStart()
 {
 	PrintToServer("Plugin l4dstatsapi RequestMapStart()");
@@ -164,7 +211,8 @@ public void RequestMapStart()
 	GetCurrentMap(CurrentMapName, sizeof(CurrentMapName));
 	
 	decl String:CurrentGameMode[MAX_LINE_WIDTH];
-	GetConVarString(cvar_Gamemode, CurrentGameMode, sizeof(CurrentGameMode));
+	GetGameModeName(CurrentGameMode, sizeof(CurrentGameMode));
+	PrintToServer("Plugin l4dstatsapi RequestMapStart() - CurrentGameMode=%s", CurrentGameMode);
 
 	MatchStartRequest matchStartRequest = new MatchStartRequest();
 	matchStartRequest.SetGameName(GameName);
@@ -184,12 +232,15 @@ public void RequestMapStart()
 
 public void OnMatchStartReceived(HTTPResponse response, any value)
 {
+	PrintToServer("Plugin l4dstatsapi OnMatchStartReceived()");
 	if (response.Status != HTTPStatus_OK) {
+		PrintToServer("Plugin l4dstatsapi OnMatchStartReceived() - %s", response.Status);
 		// Failed to retrieve identity
 		return;
 	}
 	
 	if (response.Data == null) {
+		PrintToServer("Plugin l4dstatsapi OnMatchStartReceived() - SKIPPING");
 		// Invalid JSON response
 		return;
 	}
@@ -202,6 +253,7 @@ public void OnMatchStartReceived(HTTPResponse response, any value)
 	delete currentMatchStats;
 	currentMatchStats = new MatchStatsRequest();
 	currentMatchStats.SetMatchId(CurrentMatchId);
+	PrintToServer("Plugin l4dstatsapi OnMatchStartReceived() - currentMatchStats was set!");
 
 	for (int i = 1; i < MaxClients; i++)
 	{
@@ -224,6 +276,12 @@ public Action:event_MapTransition(Handle:event, const String:name[], bool:dontBr
 {
 	PrintToServer("Plugin l4dstatsapi event_MapTransition()");
 	SendPlayerStatsRequestsAndEndMatchRequest();
+}
+
+public Action:event_RoundEnd(Handle:event, const String:name[], bool:dontBroadcast)
+{
+	PrintToServer("Plugin l4dstatsapi event_RoundEnd()");
+	FlushPlayerStatsRequests();
 }
 /*
 public OnMapEnd()
@@ -378,14 +436,15 @@ public void FlushPlayerStatsRequests()
 	PrintToServer("Plugin l4dstatsapi FlushPlayerStatsRequests()");
 	if (currentMatchStats == null || currentMatchStats.Players == null || currentMatchStats.Players.Length == 0)
 	{
+		PrintToServer("Plugin l4dstatsapi FlushPlayerStatsRequests() - SKIPPING");
 		return;
 	}
 
 	decl String:json[2048];
 	currentMatchStats.ToString(json, sizeof(json));
-	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest() - currentMatchStats=%s", json);
+	PrintToServer("Plugin l4dstatsapi FlushPlayerStatsRequests() - currentMatchStats=%s", json);
 
-	httpClient.Post("Stats/match", currentMatchStats, OnMatchStatsReceived, true);
+	httpClient.Post("Stats/append", currentMatchStats, OnMatchStatsReceived, true);
 }
 
 public void SendPlayerStatsRequestsAndEndMatchRequest()
@@ -393,6 +452,7 @@ public void SendPlayerStatsRequestsAndEndMatchRequest()
 	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest()");
 	if (currentMatchStats == null || currentMatchStats.Players == null || currentMatchStats.Players.Length == 0)
 	{
+		PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest() - SKIPPING");
 		RequestMapEnd();
 		return;
 	}
@@ -401,7 +461,7 @@ public void SendPlayerStatsRequestsAndEndMatchRequest()
 	currentMatchStats.ToString(json, sizeof(json));
 	PrintToServer("Plugin l4dstatsapi SendPlayerStatsRequestsAndEndMatchRequest() - currentMatchStats=%s", json);
 
-	httpClient.Post("Stats/match", currentMatchStats, OnMatchStatsReceived, true);
+	httpClient.Post("Stats/append", currentMatchStats, OnMatchStatsReceived, true);
 
 	RequestMapEnd();
 }
@@ -439,6 +499,7 @@ public Action:event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 {
 	if (currentMatchStats == null)
 	{
+		PrintToServer("Plugin l4dstatsapi event_PlayerDeath() - SKIPPING");
 		return;
 	}
 
